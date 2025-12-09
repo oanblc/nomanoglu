@@ -38,6 +38,8 @@ const BottomTabNavigator = () => {
           paddingHorizontal: 4,
           position: 'absolute',
           bottom: 0,
+          left: 0,
+          right: 0,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.08,
@@ -122,6 +124,7 @@ const BottomTabNavigator = () => {
         component={MarketsScreen}
         options={{
           tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tab.Screen
@@ -129,6 +132,7 @@ const BottomTabNavigator = () => {
         component={AlarmsScreen}
         options={{
           tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tab.Screen
@@ -136,6 +140,7 @@ const BottomTabNavigator = () => {
         component={FavoritesScreen}
         options={{
           tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tab.Screen
@@ -143,6 +148,7 @@ const BottomTabNavigator = () => {
         component={AboutScreen}
         options={{
           tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tab.Screen
@@ -150,6 +156,7 @@ const BottomTabNavigator = () => {
         component={ContactScreen}
         options={{
           tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
         }}
       />
     </Tab.Navigator>

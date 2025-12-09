@@ -1,71 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Modal, Animated, Dimensions, StatusBar, Image } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette, gradient } from '../../theme/colors';
-
-const { width } = Dimensions.get('window');
-const DRAWER_WIDTH = width * 0.75;
+import Sidebar from '../components/Sidebar';
 
 const AboutScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const [drawerVisible, setDrawerVisible] = useState(false);
-  const [slideAnim] = useState(new Animated.Value(-DRAWER_WIDTH));
-  const [overlayOpacity] = useState(new Animated.Value(0));
+  const sidebarRef = useRef(null);
 
   const openDrawer = () => {
-    setDrawerVisible(true);
-    Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(overlayOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const closeDrawer = () => {
-    Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: -DRAWER_WIDTH,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(overlayOpacity, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-    ]).start(() => setDrawerVisible(false));
-  };
-
-  const handleMenuPress = (action) => {
-    closeDrawer();
-    setTimeout(() => {
-      if (action === 'whatsapp') {
-        Linking.openURL('https://wa.me/905322904601');
-      } else if (action === 'phone') {
-        Linking.openURL('tel:+905322904601');
-      } else if (action === 'markets' && navigation) {
-        navigation.navigate('MainTabs', { screen: 'Piyasa' });
-      } else if (action === 'alarms' && navigation) {
-        navigation.navigate('MainTabs', { screen: 'Alarmlar' });
-      } else if (action === 'favorites' && navigation) {
-        navigation.navigate('MainTabs', { screen: 'Favorilerim' });
-      } else if (action === 'home' && navigation) {
-        navigation.navigate('MainTabs', { screen: 'AnaSayfa' });
-      } else if (action === 'about' && navigation) {
-        navigation.navigate('Hakkimizda');
-      } else if (action === 'contact' && navigation) {
-        navigation.navigate('Iletisim');
-      }
-    }, 300);
+    sidebarRef.current?.open();
   };
 
   return (
@@ -96,7 +42,7 @@ const AboutScreen = ({ navigation }) => {
         </View>
       </LinearGradient>
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: 60 + insets.bottom + 20 }}
         showsVerticalScrollIndicator={false}
@@ -133,135 +79,8 @@ const AboutScreen = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {/* Drawer Menu */}
-      <Modal
-        visible={drawerVisible}
-        transparent
-        animationType="none"
-        onRequestClose={closeDrawer}
-      >
-        <View style={styles.modalContainer}>
-          <Animated.View 
-            style={[
-              styles.drawer,
-              { transform: [{ translateX: slideAnim }] }
-            ]}
-          >
-            <LinearGradient
-              colors={gradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.drawerGradient}
-            >
-              <View style={styles.drawerContentContainer}>
-                
-                {/* 1. Modern Header: Logo + Kapat Butonu */}
-                <View style={[styles.modernDrawerHeader, { marginTop: insets.top }]}>
-                  <Image 
-                    source={require('../../assets/logo.png')} 
-                    style={styles.modernLogo}
-                    resizeMode="contain"
-                  />
-                  <TouchableOpacity onPress={closeDrawer} style={styles.closeButton}>
-                    <FontAwesome5 name="times" size={18} color={palette.headerText} />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* 2. Menü Listesi */}
-                <View style={styles.menuList}>
-
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('home')}>
-                    <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="home" size={18} color={palette.headerText} />
-                    </View>
-                    <Text style={styles.modernMenuText}>Ana Sayfa</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('markets')}>
-                    <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="chart-line" size={18} color={palette.headerText} />
-                    </View>
-                    <Text style={styles.modernMenuText}>Piyasalar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('favorites')}>
-                    <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="star" size={18} color={palette.headerText} />
-                    </View>
-                    <Text style={styles.modernMenuText}>Favorilerim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('alarms')}>
-                    <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="bell" size={18} color={palette.headerText} />
-                    </View>
-                    <Text style={styles.modernMenuText}>Alarmlar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('about')}>
-                    <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="info-circle" size={18} color={palette.headerText} />
-                    </View>
-                    <Text style={styles.modernMenuText}>Kurumsal</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('contact')}>
-                    <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="envelope" size={18} color={palette.headerText} />
-                    </View>
-                    <Text style={styles.modernMenuText}>İletişim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* 3. Alt Footer: İletişim Butonları */}
-                <View style={[styles.modernFooter, { paddingBottom: insets.bottom + 20 }]}>
-                  <Text style={styles.footerTitle}>BİZE ULAŞIN</Text>
-                  <View style={styles.footerButtons}>
-                    <TouchableOpacity
-                      style={styles.footerBtnWhatsapp}
-                      onPress={() => handleMenuPress('whatsapp')}
-                    >
-                      <FontAwesome5 name="whatsapp" size={18} color="#F7DE00" />
-                      <Text style={styles.footerBtnTextDark}>WhatsApp</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.footerBtnPhone}
-                      onPress={() => handleMenuPress('phone')}
-                    >
-                      <FontAwesome5 name="phone" size={16} color="#F7DE00" />
-                      <Text style={styles.footerBtnTextDark}>Ara</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.versionText}>v1.0.0 • Nomanoğlu Altın</Text>
-                </View>
-
-              </View>
-            </LinearGradient>
-          </Animated.View>
-
-          <Animated.View 
-            style={[
-              styles.overlay,
-              { opacity: overlayOpacity }
-            ]}
-          >
-            <TouchableOpacity 
-              style={{ flex: 1 }}
-              activeOpacity={1}
-              onPress={closeDrawer}
-            />
-          </Animated.View>
-        </View>
-      </Modal>
+      {/* Sidebar Component */}
+      <Sidebar ref={sidebarRef} navigation={navigation} />
     </View>
   );
 };
@@ -319,7 +138,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     letterSpacing: 0.5,
   },
-  // About Card
   aboutCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
@@ -368,164 +186,6 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: '#e5e7eb',
   },
-  // Drawer Styles (modern sidebar)
-  modalContainer: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  drawer: {
-    width: DRAWER_WIDTH,
-    backgroundColor: '#FFFFFF',
-    height: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 16,
-  },
-  drawerGradient: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  drawerContentContainer: {
-    flex: 1,
-  },
-  modernDrawerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-  },
-  modernLogo: {
-    width: 180,
-    height: 52,
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    marginHorizontal: 18,
-    marginBottom: 8,
-  },
-  menuList: {
-    paddingTop: 10,
-    paddingBottom: 16,
-  },
-  modernMenuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    marginBottom: 4,
-  },
-  menuIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-  },
-  modernMenuText: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  modernFooter: {
-    paddingHorizontal: 18,
-    paddingTop: 10,
-  },
-  footerTitle: {
-    color: 'rgba(0,0,0,0.6)',
-    fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  footerButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-  footerBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  footerBtnText: {
-    color: '#1A1A1A',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  footerBtnWhatsapp: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 10,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#F7DE00',
-    shadowColor: '#F7DE00',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  footerBtnPhone: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 10,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#F7DE00',
-    shadowColor: '#F7DE00',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  footerBtnTextDark: {
-    color: '#1A1A1A',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  versionText: {
-    marginTop: 10,
-    textAlign: 'center',
-    color: 'rgba(0,0,0,0.5)',
-    fontSize: 11,
-  },
 });
 
 export default AboutScreen;
-
-
