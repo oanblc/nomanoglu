@@ -58,7 +58,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={palette.headerGradientStart} />
+      <StatusBar barStyle="dark-content" backgroundColor={palette.headerGradientStart} />
       <PriceList data={displayData} topRates={topRates} navigation={navigation} />
     </View>
   );

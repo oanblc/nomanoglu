@@ -110,7 +110,7 @@ const MarketsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={palette.headerGradientStart} />
+      <StatusBar barStyle="dark-content" backgroundColor={palette.headerGradientStart} />
       
       {/* Fixed Header with Menu */}
       <LinearGradient
@@ -121,7 +121,7 @@ const MarketsScreen = ({ navigation }) => {
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color="#FFFFFF" />
+            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
           </TouchableOpacity>
           
           <View style={styles.logoContainer}>
@@ -169,7 +169,7 @@ const MarketsScreen = ({ navigation }) => {
                     resizeMode="contain"
                   />
                   <TouchableOpacity onPress={closeDrawer} style={styles.closeButton}>
-                    <FontAwesome5 name="times" size={20} color="#FFFFFF" />
+                    <FontAwesome5 name="times" size={20} color={palette.headerText} />
                   </TouchableOpacity>
                 </View>
 
@@ -179,50 +179,50 @@ const MarketsScreen = ({ navigation }) => {
                 <View style={styles.menuList}>
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('home')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="home" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="home" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Ana Sayfa</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('markets')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="chart-line" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="chart-line" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Piyasalar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('favorites')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="star" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="star" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Favorilerim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('alarms')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="bell" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="bell" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Alarmlar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('about')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="info-circle" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="info-circle" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Kurumsal</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('contact')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="envelope" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="envelope" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>İletişim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
                 </View>
 
@@ -230,20 +230,20 @@ const MarketsScreen = ({ navigation }) => {
                 <View style={[styles.modernFooter, { paddingBottom: insets.bottom + 20 }]}>
                   <Text style={styles.footerTitle}>BİZE ULAŞIN</Text>
                   <View style={styles.footerButtons}>
-                    <TouchableOpacity 
-                      style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                    <TouchableOpacity
+                      style={styles.footerBtnWhatsapp}
                       onPress={() => handleMenuPress('whatsapp')}
                     >
-                      <FontAwesome5 name="whatsapp" size={20} color="#fff" />
-                      <Text style={styles.footerBtnText}>WhatsApp</Text>
+                      <FontAwesome5 name="whatsapp" size={18} color="#F7DE00" />
+                      <Text style={styles.footerBtnTextDark}>WhatsApp</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity 
-                      style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                    <TouchableOpacity
+                      style={styles.footerBtnPhone}
                       onPress={() => handleMenuPress('phone')}
                     >
-                      <FontAwesome5 name="phone" size={18} color="#fff" />
-                      <Text style={styles.footerBtnText}>Ara</Text>
+                      <FontAwesome5 name="phone" size={16} color="#F7DE00" />
+                      <Text style={styles.footerBtnTextDark}>Ara</Text>
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.versionText}>v1.0.0 • Nomanoğlu Altın</Text>
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   drawerHeader: {
     paddingHorizontal: 20,
@@ -426,13 +426,12 @@ const styles = StyleSheet.create({
   modernLogo: {
     width: 140,
     height: 40,
-    tintColor: '#FFFFFF',
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -450,13 +449,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   modernMenuText: {
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#1A1A1A',
   },
   modernFooter: {
     padding: 20,
@@ -466,7 +465,7 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 11,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(0,0,0,0.6)',
     marginBottom: 12,
     letterSpacing: 1,
   },
@@ -490,18 +489,47 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   footerBtnText: {
-    color: '#fff',
+    color: '#1A1A1A',
     fontWeight: '600',
+    fontSize: 14,
+  },
+  footerBtnWhatsapp: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#F7DE00',
+  },
+  footerBtnPhone: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#F7DE00',
+  },
+  footerBtnTextDark: {
+    color: '#1A1A1A',
+    fontWeight: '700',
     fontSize: 14,
   },
   versionText: {
     textAlign: 'center',
     fontSize: 11,
-    color: 'rgba(255,255,255,0.5)',
+    color: 'rgba(0,0,0,0.5)',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.15)',
     marginHorizontal: 20,
     marginBottom: 10,
   },

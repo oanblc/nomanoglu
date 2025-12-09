@@ -133,7 +133,7 @@ const Header = ({ topRates = [], navigation }) => {
         end={{ x: 0, y: 1 }}
         style={[styles.container, { paddingTop: insets.top > 0 ? insets.top : 40 }]}
       >
-        <StatusBar barStyle="light-content" backgroundColor={palette.headerGradientStart} />
+        <StatusBar barStyle="dark-content" backgroundColor={palette.headerGradientStart} />
         
         {/* Top Bar */}
         <View style={styles.topBar}>
@@ -233,108 +233,101 @@ const Header = ({ topRates = [], navigation }) => {
               { transform: [{ translateX: slideAnim }] }
             ]}
           >
-            <LinearGradient
-              colors={gradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.drawerGradient}
-            >
-              {/* Drawer İçeriği - YENİ TASARIM */}
-              <View style={styles.drawerContentContainer}>
-                
-                {/* 1. Modern Header: Logo + Kapat Butonu */}
-                <View style={[styles.modernDrawerHeader, { marginTop: insets.top }]}>
-                  <Image 
-                    source={require('../../assets/logo.png')} 
-                    style={styles.modernLogo}
+            <View style={styles.drawerContainer}>
+              {/* Header - Sarı Arka Plan */}
+              <LinearGradient
+                colors={['#F7DE00', '#F7DE00']}
+                style={[styles.drawerHeader, { paddingTop: insets.top + 12 }]}
+              >
+                <View style={styles.drawerHeaderRow}>
+                  <Image
+                    source={require('../../assets/logo.png')}
+                    style={styles.drawerLogoImg}
                     resizeMode="contain"
                   />
-                  <TouchableOpacity onPress={closeDrawer} style={styles.closeButton}>
-                    <FontAwesome5 name="times" size={18} color="rgba(255,255,255,0.85)" />
+                  <TouchableOpacity onPress={closeDrawer} style={styles.closeBtnSmall}>
+                    <FontAwesome5 name="times" size={14} color="#1A1A1A" />
                   </TouchableOpacity>
                 </View>
+              </LinearGradient>
 
-                <View style={styles.divider} />
-
-                {/* 2. Menü Listesi */}
+              {/* Menu - Liste */}
+              <View style={styles.menuContainer}>
+                {/* Navigation Items - Alt Alta */}
                 <View style={styles.menuList}>
-                  
-                  {/* Menü Öğeleri */}
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('home')}>
+                  <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuPress('home')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="home" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="home" size={16} color="#F7DE00" />
                     </View>
-                    <Text style={styles.modernMenuText}>Ana Sayfa</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <Text style={styles.menuItemText}>Ana Sayfa</Text>
+                    <FontAwesome5 name="chevron-right" size={12} color="#D1D5DB" />
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('markets')}>
+                  <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuPress('markets')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="chart-line" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="chart-line" size={16} color="#F7DE00" />
                     </View>
-                    <Text style={styles.modernMenuText}>Piyasalar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <Text style={styles.menuItemText}>Piyasalar</Text>
+                    <FontAwesome5 name="chevron-right" size={12} color="#D1D5DB" />
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('favorites')}>
+                  <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuPress('favorites')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="star" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="star" size={16} color="#F7DE00" />
                     </View>
-                    <Text style={styles.modernMenuText}>Favorilerim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <Text style={styles.menuItemText}>Favoriler</Text>
+                    <FontAwesome5 name="chevron-right" size={12} color="#D1D5DB" />
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('alarms')}>
+                  <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuPress('alarms')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="bell" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="bell" size={16} color="#F7DE00" />
                     </View>
-                    <Text style={styles.modernMenuText}>Alarmlar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <Text style={styles.menuItemText}>Alarmlar</Text>
+                    <FontAwesome5 name="chevron-right" size={12} color="#D1D5DB" />
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('about')}>
+                  <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuPress('about')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="info-circle" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="building" size={16} color="#6B7280" />
                     </View>
-                    <Text style={styles.modernMenuText}>Kurumsal</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <Text style={styles.menuItemText}>Hakkımızda</Text>
+                    <FontAwesome5 name="chevron-right" size={12} color="#D1D5DB" />
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('contact')}>
+                  <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuPress('contact')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="envelope" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="envelope" size={16} color="#6B7280" />
                     </View>
-                    <Text style={styles.modernMenuText}>İletişim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <Text style={styles.menuItemText}>İletişim</Text>
+                    <FontAwesome5 name="chevron-right" size={12} color="#D1D5DB" />
                   </TouchableOpacity>
-                  
                 </View>
 
-                {/* 3. Alt Footer: İletişim Butonları */}
-                <View style={[styles.modernFooter, { paddingBottom: insets.bottom + 20 }]}>
-                  <Text style={styles.footerTitle}>BİZE ULAŞIN</Text>
-                <View style={styles.footerButtons}>
-                  <TouchableOpacity 
-                    style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                {/* Contact Buttons */}
+                <View style={styles.contactSection}>
+                  <TouchableOpacity
+                    style={styles.contactBtn}
                     onPress={() => handleMenuPress('whatsapp')}
                   >
-                    <FontAwesome5 name="whatsapp" size={20} color="#fff" />
-                    <Text style={styles.footerBtnText}>WhatsApp</Text>
+                    <FontAwesome5 name="whatsapp" size={16} color="#1A1A1A" />
+                    <Text style={[styles.contactBtnLabel, { color: '#1A1A1A' }]}>WhatsApp</Text>
                   </TouchableOpacity>
-
-                  <TouchableOpacity 
-                    style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                  <TouchableOpacity
+                    style={[styles.contactBtn, styles.contactBtnAlt]}
                     onPress={() => handleMenuPress('phone')}
                   >
-                    <FontAwesome5 name="phone" size={18} color="#fff" />
-                    <Text style={styles.footerBtnText}>Ara</Text>
+                    <FontAwesome5 name="phone-alt" size={14} color="#FFF" />
+                    <Text style={styles.contactBtnLabel}>Ara</Text>
                   </TouchableOpacity>
                 </View>
-                  <Text style={styles.versionText}>v1.0.0 • Nomanoğlu Altın</Text>
-                </View>
-
               </View>
-            </LinearGradient>
+
+              {/* Footer */}
+              <View style={[styles.drawerFooterCompact, { paddingBottom: insets.bottom + 8 }]}>
+                <Text style={styles.footerText}>v1.0.0 • © 2024 Nomanoğlu</Text>
+              </View>
+            </View>
           </Animated.View>
 
           <Animated.View 
@@ -447,7 +440,7 @@ const styles = StyleSheet.create({
   },
   heroRatesScroll: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: 'rgba(0,0,0,0.1)',
   },
   heroRatesContent: {
     paddingVertical: 10,
@@ -459,7 +452,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginRight: 10,
     borderRightWidth: 1.5,
-    borderRightColor: 'rgba(255,255,255,0.35)', // üst kartlar arası ayraç daha belirgin
+    borderRightColor: 'rgba(0,0,0,0.15)',
   },
   heroSymbol: {
     color: palette.heroSymbol,
@@ -476,7 +469,7 @@ const styles = StyleSheet.create({
   },
   heroPriceLabel: {
     fontSize: 10,
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(0,0,0,0.6)',
     marginBottom: 4,
   },
   heroPriceText: {
@@ -500,7 +493,7 @@ const styles = StyleSheet.create({
   greenBar: {
     height: 2,
     width: 22,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
     borderRadius: 1,
   },
   addButton: {
@@ -510,7 +503,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
+    borderColor: 'rgba(0,0,0,0.2)',
     borderRadius: 8,
     borderStyle: 'dashed',
   },
@@ -529,176 +522,167 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     height: '100%',
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 16,
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  drawerGradient: {
-    flex: 1,
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 20,
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
-  drawerHeader: {
+  // Modern Drawer Styles
+  drawerContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  drawerHeaderSection: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  drawerHeaderContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    // justifyContent: 'center', // Inline style ile yönetiliyor
-  },
-  drawerLogoImage: {
-    width: 180,
-    height: 60,
-    marginBottom: 5,
-  },
-  drawerSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.9)',
-    letterSpacing: 4,
-    fontWeight: '600',
-    marginTop: 0,
-  },
-  logoCircleText: {
-    fontSize: 36,
-    fontWeight: '300',
-    color: '#FFFFFF',
-    fontFamily: 'serif',
+    marginBottom: 8,
   },
   drawerLogo: {
-    fontSize: 26,
-    fontWeight: '400',
-    color: '#FFFFFF',
-    letterSpacing: 3,
-    fontFamily: 'serif',
-    marginBottom: 4,
+    width: 140,
+    height: 45,
   },
-  drawerSubtitle: {
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(26, 26, 26, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  drawerTagline: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.9)',
-    letterSpacing: 2,
-    fontWeight: '300',
+    color: '#1A1A1A',
+    fontWeight: '500',
+    opacity: 0.7,
   },
-  menuList: {
-    paddingTop: 10,
-    paddingBottom: 16,
+  menuScrollView: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  menuScrollContent: {
+    paddingTop: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  menuSection: {
+    marginBottom: 24,
+  },
+  menuSectionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#9CA3AF',
+    letterSpacing: 1.2,
+    marginBottom: 12,
+    marginLeft: 4,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#e8e8e8',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    marginBottom: 8,
   },
-  iconCircle: {
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  menuIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
   },
-  menuText: {
-    flex: 1,
-    fontSize: 15,
-    color: '#2c3e50',
-    marginLeft: 14,
-    fontWeight: '500',
-  },
-  // --- YENİ TASARIM STİLLERİ ---
-  drawerContentContainer: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  modernDrawerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-  },
-  modernLogo: {
-    width: 180,
-    height: 52,
-    tintColor: '#FFFFFF',
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modernMenuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    marginBottom: 4,
-  },
-  menuIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  modernMenuText: {
-    flex: 1,
+  menuItemText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#1F2937',
   },
-  modernFooter: {
-    padding: 20,
-    backgroundColor: 'transparent',
-    borderTopWidth: 0,
-  },
-  footerTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.7)',
-    marginBottom: 12,
-    letterSpacing: 1,
-  },
-  footerButtons: {
+  socialRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 16,
   },
-  footerBtn: {
+  socialBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contactCard: {
+    backgroundColor: '#F7DE00',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 8,
+  },
+  contactCardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 12,
+  },
+  contactBtns: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  contactBtnWhatsapp: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#1A1A1A',
     paddingVertical: 12,
     borderRadius: 10,
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 3,
-    elevation: 3,
   },
-  footerBtnText: {
-    color: '#fff',
-    fontWeight: '600',
+  contactBtnCall: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1A1A1A',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 8,
+  },
+  contactBtnText: {
+    color: '#FFFFFF',
     fontSize: 14,
+    fontWeight: '600',
   },
-  versionText: {
-    textAlign: 'center',
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.5)',
+  drawerFooter: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+    alignItems: 'center',
   },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    marginHorizontal: 20,
-    marginBottom: 10,
+  footerVersion: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginBottom: 2,
+  },
+  footerCopyright: {
+    fontSize: 10,
+    color: '#9CA3AF',
   },
   // Price Modal Styles
   priceModalContainer: {
@@ -750,6 +734,99 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     color: palette.headerGradientStart,
+  },
+  // Compact Sidebar Styles
+  drawerHeader: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  drawerHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  drawerLogoImg: {
+    width: 125,
+    height: 45,
+  },
+  closeBtnSmall: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(26, 26, 26, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContainer: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    justifyContent: 'space-between',
+  },
+  menuList: {
+    flex: 1,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 10,
+    marginBottom: 6,
+  },
+  menuIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  menuItemText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  contactSection: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 16,
+  },
+  contactBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F7DE00',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 8,
+  },
+  contactBtnAlt: {
+    backgroundColor: '#1A1A1A',
+  },
+  contactBtnLabel: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  drawerFooterCompact: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+  },
+  footerText: {
+    fontSize: 11,
+    color: '#9CA3AF',
   },
 });
 

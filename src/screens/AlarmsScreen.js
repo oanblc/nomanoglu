@@ -174,8 +174,8 @@ const AlarmsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={palette.headerGradientStart} />
-      
+      <StatusBar barStyle="dark-content" backgroundColor={palette.headerGradientStart} />
+
       {/* Fixed Header */}
       <LinearGradient
         colors={gradient}
@@ -185,19 +185,19 @@ const AlarmsScreen = ({ navigation }) => {
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color="#FFFFFF" />
+            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
           </TouchableOpacity>
-          
+
           <View style={styles.logoContainer}>
-            <Image 
-              source={require('../../assets/logo.png')} 
+            <Image
+              source={require('../../assets/logo.png')}
               style={styles.headerLogoImage}
               resizeMode="contain"
             />
           </View>
-          
+
           <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
-            <FontAwesome5 name="plus" size={24} color="#FFFFFF" />
+            <FontAwesome5 name="plus" size={24} color={palette.headerText} />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -212,49 +212,76 @@ const AlarmsScreen = ({ navigation }) => {
             const currentPrice = priceInfo
               ? (item.priceType === 'Alış' ? priceInfo.buying : priceInfo.selling)
               : '-';
+            const isAbove = item.condition === '>';
 
             return (
-              <LinearGradient
-                colors={['#FFF7D6', '#FFFBEB']} // çok hafif soldan sağa sarı gradient
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.alarmItem}
-              >
-                <View style={styles.alarmLeft}>
-                  <Text style={styles.alarmCode}>{item.code}</Text>
-                  <Text style={styles.alarmCondition}>{item.name}</Text>
+              <View style={styles.alarmCard}>
+                {/* Üst Kısım - Kod ve İkon */}
+                <View style={styles.alarmCardHeader}>
+                  <View style={styles.alarmIconContainer}>
+                    <LinearGradient
+                      colors={[palette.headerGradientStart, palette.headerGradientEnd]}
+                      style={styles.alarmIconGradient}
+                    >
+                      <FontAwesome5
+                        name={item.code.includes('ALTIN') || item.code.includes('GUMUS') ? 'coins' : 'dollar-sign'}
+                        size={16}
+                        color={palette.headerText}
+                      />
+                    </LinearGradient>
+                  </View>
+                  <View style={styles.alarmHeaderText}>
+                    <Text style={styles.alarmCode}>{item.code}</Text>
+                    <Text style={styles.alarmName}>{item.name}</Text>
+                  </View>
+                  <View style={styles.alarmBadge}>
+                    <FontAwesome5
+                      name={isAbove ? 'arrow-up' : 'arrow-down'}
+                      size={10}
+                      color={isAbove ? '#22C55E' : '#EF4444'}
+                    />
+                    <Text style={[styles.alarmBadgeText, { color: isAbove ? '#22C55E' : '#EF4444' }]}>
+                      {isAbove ? 'Üstüne Çıkarsa' : 'Altına Düşerse'}
+                    </Text>
+                  </View>
                 </View>
 
-                <View style={styles.alarmCenter}>
-                  <View style={styles.alarmPriceRow}>
-                    <Text style={styles.alarmPriceLabel}>Güncel</Text>
-                    <Text style={styles.alarmPriceValue}>{currentPrice}</Text>
+                {/* Fiyat Bilgileri */}
+                <View style={styles.alarmPriceContainer}>
+                  <View style={styles.alarmPriceBox}>
+                    <Text style={styles.alarmPriceBoxLabel}>GÜNCEL FİYAT</Text>
+                    <Text style={styles.alarmPriceBoxValue}>{currentPrice}</Text>
+                    <Text style={styles.alarmPriceBoxSub}>{item.priceType}</Text>
                   </View>
-                  <View style={styles.alarmPriceRow}>
-                    <Text style={styles.alarmPriceLabel}>Hedef</Text>
-                    <Text style={styles.alarmPriceValue}>{item.targetPrice}</Text>
+                  <View style={styles.alarmPriceDivider}>
+                    <FontAwesome5 name="exchange-alt" size={14} color="#F7DE00" />
+                  </View>
+                  <View style={styles.alarmPriceBox}>
+                    <Text style={styles.alarmPriceBoxLabel}>HEDEF FİYAT</Text>
+                    <Text style={[styles.alarmPriceBoxValue, styles.alarmTargetValue]}>{item.targetPrice}</Text>
+                    <Text style={styles.alarmPriceBoxSub}>{item.priceType}</Text>
                   </View>
                 </View>
 
-                <View style={styles.alarmActions}>
-                  <FontAwesome5
-                    name="bell"
-                    size={18}
-                    color={palette.navInactive} // sönük görünmesi için pasif gri
-                    style={{ marginRight: 10 }}
-                  />
-                  <TouchableOpacity 
-                    style={styles.deleteButton}
+                {/* Alt Kısım - Aksiyon */}
+                <View style={styles.alarmCardFooter}>
+                  <View style={styles.alarmStatusContainer}>
+                    <View style={styles.alarmStatusDot} />
+                    <Text style={styles.alarmStatusText}>Aktif</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.alarmDeleteButton}
                     onPress={() => deleteAlarm(item.id)}
                   >
-                    <FontAwesome5 name="trash" size={16} color={palette.headerGradientEnd} />
+                    <FontAwesome5 name="trash-alt" size={14} color="#EF4444" />
+                    <Text style={styles.alarmDeleteText}>Sil</Text>
                   </TouchableOpacity>
                 </View>
-              </LinearGradient>
+              </View>
             );
           }}
           keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingBottom: 60 + insets.bottom + 10 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 60 + insets.bottom + 10 }}
         />
       )}
 
@@ -288,7 +315,7 @@ const AlarmsScreen = ({ navigation }) => {
                     resizeMode="contain"
                   />
                   <TouchableOpacity onPress={closeDrawer} style={styles.closeButton}>
-                    <FontAwesome5 name="times" size={20} color="#FFFFFF" />
+                    <FontAwesome5 name="times" size={20} color={palette.headerText} />
                   </TouchableOpacity>
                 </View>
 
@@ -298,50 +325,50 @@ const AlarmsScreen = ({ navigation }) => {
                 <View style={styles.menuList}>
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('home')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="home" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="home" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Ana Sayfa</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('markets')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="chart-line" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="chart-line" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Piyasalar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('favorites')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="star" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="star" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Favorilerim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('alarms')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="bell" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="bell" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Alarmlar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('about')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="info-circle" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="info-circle" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Kurumsal</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('contact')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="envelope" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="envelope" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>İletişim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
                 </View>
 
@@ -349,20 +376,20 @@ const AlarmsScreen = ({ navigation }) => {
                 <View style={[styles.modernFooter, { paddingBottom: insets.bottom + 20 }]}>
                   <Text style={styles.footerTitle}>BİZE ULAŞIN</Text>
                   <View style={styles.footerButtons}>
-                    <TouchableOpacity 
-                      style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                    <TouchableOpacity
+                      style={styles.footerBtnWhatsapp}
                       onPress={() => handleMenuPress('whatsapp')}
                     >
-                      <FontAwesome5 name="whatsapp" size={20} color="#fff" />
-                      <Text style={styles.footerBtnText}>WhatsApp</Text>
+                      <FontAwesome5 name="whatsapp" size={18} color="#F7DE00" />
+                      <Text style={styles.footerBtnTextDark}>WhatsApp</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity 
-                      style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                    <TouchableOpacity
+                      style={styles.footerBtnPhone}
                       onPress={() => handleMenuPress('phone')}
                     >
-                      <FontAwesome5 name="phone" size={18} color="#fff" />
-                      <Text style={styles.footerBtnText}>Ara</Text>
+                      <FontAwesome5 name="phone" size={16} color="#F7DE00" />
+                      <Text style={styles.footerBtnTextDark}>Ara</Text>
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.versionText}>v1.0.0 • Nomanoğlu Altın</Text>
@@ -549,9 +576,11 @@ const AlarmsScreen = ({ navigation }) => {
                 keyboardType="decimal-pad"
                 placeholderTextColor="#999"
               />
+            </ScrollView>
 
-              {/* Create Button */}
-              <TouchableOpacity 
+            {/* Fixed Create Button */}
+            <View style={styles.fixedButtonContainer}>
+              <TouchableOpacity
                 style={[
                   styles.createAlarmButton,
                   (!selectedPrice || !targetPrice) && styles.createAlarmButtonDisabled
@@ -562,7 +591,7 @@ const AlarmsScreen = ({ navigation }) => {
                 <FontAwesome5 name="bell" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.createAlarmButtonText}>ALARM OLUŞTUR</Text>
               </TouchableOpacity>
-            </ScrollView>
+            </View>
           </View>
         </View>
       </Modal>
@@ -668,6 +697,141 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  // Premium Alarm Card Styles
+  alarmCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(247, 222, 0, 0.15)',
+  },
+  alarmCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  alarmIconContainer: {
+    marginRight: 12,
+  },
+  alarmIconGradient: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alarmHeaderText: {
+    flex: 1,
+  },
+  alarmCode: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    letterSpacing: 0.5,
+  },
+  alarmName: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
+  },
+  alarmBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
+  },
+  alarmBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  alarmPriceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#FAFAFA',
+  },
+  alarmPriceBox: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  alarmPriceBoxLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#999',
+    letterSpacing: 1,
+    marginBottom: 6,
+  },
+  alarmPriceBoxValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  alarmTargetValue: {
+    color: '#F7DE00',
+  },
+  alarmPriceBoxSub: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 4,
+  },
+  alarmPriceDivider: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFF9E6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alarmCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 14,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F5F5F5',
+  },
+  alarmStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  alarmStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#22C55E',
+  },
+  alarmStatusText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#22C55E',
+  },
+  alarmDeleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF2F2',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  alarmDeleteText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#EF4444',
+  },
+  // Legacy styles (keeping for compatibility)
   alarmItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -743,7 +907,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   drawerHeader: {
     paddingHorizontal: 20,
@@ -823,13 +987,12 @@ const styles = StyleSheet.create({
   modernLogo: {
     width: 140,
     height: 40,
-    tintColor: '#FFFFFF',
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -847,13 +1010,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   modernMenuText: {
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#1A1A1A',
   },
   modernFooter: {
     padding: 20,
@@ -863,7 +1026,7 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 11,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(0,0,0,0.6)',
     marginBottom: 12,
     letterSpacing: 1,
   },
@@ -887,18 +1050,57 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   footerBtnText: {
-    color: '#fff',
+    color: '#1A1A1A',
     fontWeight: '600',
+    fontSize: 14,
+  },
+  footerBtnWhatsapp: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#F7DE00',
+    shadowColor: '#F7DE00',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  footerBtnPhone: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#F7DE00',
+    shadowColor: '#F7DE00',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  footerBtnTextDark: {
+    color: '#1A1A1A',
+    fontWeight: '700',
     fontSize: 14,
   },
   versionText: {
     textAlign: 'center',
     fontSize: 11,
-    color: 'rgba(255,255,255,0.5)',
+    color: 'rgba(0,0,0,0.5)',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.15)',
     marginHorizontal: 20,
     marginBottom: 10,
   },
@@ -911,7 +1113,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '70%',
+    height: '85%',
   },
   createModalHeader: {
     flexDirection: 'row',
@@ -927,6 +1129,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   createModalBody: {
+    flex: 1,
     padding: 20,
   },
   formLabel: {
@@ -999,6 +1202,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     marginBottom: 20,
   },
+  fixedButtonContainer: {
+    padding: 20,
+    paddingBottom: 30,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
   createAlarmButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1006,8 +1216,6 @@ const styles = StyleSheet.create({
     backgroundColor: palette.headerGradientStart,
     paddingVertical: 16,
     borderRadius: 12,
-    marginTop: 10,
-    marginBottom: 20,
     shadowColor: palette.headerGradientStart,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,

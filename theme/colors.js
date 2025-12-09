@@ -1,31 +1,31 @@
 export const palette = {
-  headerGradientStart: '#d4af37',
-  headerGradientMiddle: '#c9a227',
-  headerGradientEnd: '#b8860b',
+  headerGradientStart: '#F7DE00',
+  headerGradientMiddle: '#F7DE00',
+  headerGradientEnd: '#F7DE00',
   background: '#e0e0e0',
   screenBackground: '#FFFFFF',
-  
+
   // Header text colors
-  headerText: '#FFFFFF',
-  heroSymbol: '#000000',
-  
+  headerText: '#1A1A1A',
+  heroSymbol: '#1A1A1A',
+
   // Indicators
-  percentGreen: '#FFFFFF',
-  greenBar: '#FFFFFF',
-  
+  percentGreen: '#1A1A1A',
+  greenBar: '#1A1A1A',
+
   // List
   listHeaderBg: '#f0f2f5',
   listHeaderText: '#6c757d',
-  
+
   // Currency Item
   currencyCode: '#333333',
   currencyName: '#888888',
   priceText: '#44566c',
   timeBadge: '#aaaaaa',
   border: '#eeeeee',
-  
+
   // Navigation
-  navActive: '#d4af37',
+  navActive: '#F7DE00',
   navInactive: '#aaaaaa',
   navBorder: '#dddddd',
   navBackground: '#FFFFFF',

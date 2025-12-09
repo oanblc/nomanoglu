@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, Platform } from 'react-native';
+import { View, Text, Platform, TouchableOpacity, Linking } from 'react-native';
 import { FontAwesome6, FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../screens/HomeScreen';
@@ -14,9 +14,14 @@ import { typography } from '../../theme/fonts';
 
 const Tab = createBottomTabNavigator();
 
+// External link tab component
+const ExternalLinkTab = ({ url, children }) => {
+  return null; // This is just a placeholder, actual navigation handled by listener
+};
+
 const BottomTabNavigator = () => {
   const insets = useSafeAreaInsets();
-  
+
   return (
     <Tab.Navigator
       initialRouteName="AnaSayfa"
@@ -41,7 +46,7 @@ const BottomTabNavigator = () => {
         },
         tabBarLabelStyle: {
           ...typography.navLabel,
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '700',
           marginTop: 2,
         },
@@ -64,33 +69,87 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Piyasa"
-        component={MarketsScreen}
+        name="Instagram"
+        component={HomeScreen}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            Linking.openURL('https://www.instagram.com/nomanoglukuyumcu/');
+          },
+        }}
         options={{
-          tabBarLabel: 'Piyasalar',
+          tabBarLabel: 'Instagram',
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome6 name="chart-line" size={20} color={color} />
+            <FontAwesome5 name="instagram" size={20} color={color} />
           ),
         }}
       />
       <Tab.Screen
-        name="Favorilerim"
-        component={FavoritesScreen}
+        name="TikTok"
+        component={HomeScreen}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            Linking.openURL('https://www.tiktok.com/@nomanoglukuyumcu');
+          },
+        }}
         options={{
-          tabBarLabel: 'Favoriler',
+          tabBarLabel: 'TikTok',
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="star" size={20} color={color} />
+            <FontAwesome5 name="tiktok" size={20} color={color} />
           ),
+        }}
+      />
+      <Tab.Screen
+        name="WebSite"
+        component={HomeScreen}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            Linking.openURL('https://www.nomanoglu.com.tr/');
+          },
+        }}
+        options={{
+          tabBarLabel: 'Web Sitesi',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="globe" size={20} color={color} />
+          ),
+        }}
+      />
+      {/* Hidden screens - accessible from sidebar */}
+      <Tab.Screen
+        name="Piyasa"
+        component={MarketsScreen}
+        options={{
+          tabBarButton: () => null,
         }}
       />
       <Tab.Screen
         name="Alarmlar"
         component={AlarmsScreen}
         options={{
-          tabBarLabel: 'Alarmlar',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="bell" size={20} color={color} />
-          ),
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="Favorilerim"
+        component={FavoritesScreen}
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="Hakkimizda"
+        component={AboutScreen}
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="Iletisim"
+        component={ContactScreen}
+        options={{
+          tabBarButton: () => null,
         }}
       />
     </Tab.Navigator>

@@ -70,8 +70,8 @@ const AboutScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={palette.headerGradientStart} />
-      
+      <StatusBar barStyle="dark-content" backgroundColor={palette.headerGradientStart} />
+
       {/* Fixed Header */}
       <LinearGradient
         colors={gradient}
@@ -81,17 +81,17 @@ const AboutScreen = ({ navigation }) => {
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color="#FFFFFF" />
+            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
           </TouchableOpacity>
-          
+
           <View style={styles.logoContainer}>
-            <Image 
-              source={require('../../assets/logo.png')} 
+            <Image
+              source={require('../../assets/logo.png')}
               style={styles.headerLogoImage}
               resizeMode="contain"
             />
           </View>
-          
+
           <View style={{ width: 32 }} />
         </View>
       </LinearGradient>
@@ -163,7 +163,7 @@ const AboutScreen = ({ navigation }) => {
                     resizeMode="contain"
                   />
                   <TouchableOpacity onPress={closeDrawer} style={styles.closeButton}>
-                    <FontAwesome5 name="times" size={18} color="rgba(255,255,255,0.85)" />
+                    <FontAwesome5 name="times" size={18} color={palette.headerText} />
                   </TouchableOpacity>
                 </View>
 
@@ -171,53 +171,53 @@ const AboutScreen = ({ navigation }) => {
 
                 {/* 2. Menü Listesi */}
                 <View style={styles.menuList}>
-                  
+
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('home')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="home" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="home" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Ana Sayfa</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('markets')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="chart-line" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="chart-line" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Piyasalar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('favorites')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="star" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="star" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Favorilerim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('alarms')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="bell" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="bell" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Alarmlar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('about')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="info-circle" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="info-circle" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Kurumsal</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('contact')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="envelope" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="envelope" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>İletişim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
                 </View>
 
@@ -225,20 +225,20 @@ const AboutScreen = ({ navigation }) => {
                 <View style={[styles.modernFooter, { paddingBottom: insets.bottom + 20 }]}>
                   <Text style={styles.footerTitle}>BİZE ULAŞIN</Text>
                   <View style={styles.footerButtons}>
-                    <TouchableOpacity 
-                      style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                    <TouchableOpacity
+                      style={styles.footerBtnWhatsapp}
                       onPress={() => handleMenuPress('whatsapp')}
                     >
-                      <FontAwesome5 name="whatsapp" size={20} color="#fff" />
-                      <Text style={styles.footerBtnText}>WhatsApp</Text>
+                      <FontAwesome5 name="whatsapp" size={18} color="#F7DE00" />
+                      <Text style={styles.footerBtnTextDark}>WhatsApp</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity 
-                      style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                    <TouchableOpacity
+                      style={styles.footerBtnPhone}
                       onPress={() => handleMenuPress('phone')}
                     >
-                      <FontAwesome5 name="phone" size={18} color="#fff" />
-                      <Text style={styles.footerBtnText}>Ara</Text>
+                      <FontAwesome5 name="phone" size={16} color="#F7DE00" />
+                      <Text style={styles.footerBtnTextDark}>Ara</Text>
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.versionText}>v1.0.0 • Nomanoğlu Altın</Text>
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   drawerContentContainer: {
     flex: 1,
@@ -403,19 +403,18 @@ const styles = StyleSheet.create({
   modernLogo: {
     width: 180,
     height: 52,
-    tintColor: '#FFFFFF',
   },
   closeButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.35)',
+    backgroundColor: 'rgba(0,0,0,0.15)',
     marginHorizontal: 18,
     marginBottom: 8,
   },
@@ -434,7 +433,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
@@ -443,14 +442,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#1A1A1A',
   },
   modernFooter: {
     paddingHorizontal: 18,
     paddingTop: 10,
   },
   footerTitle: {
-    color: 'rgba(255,255,255,0.9)',
+    color: 'rgba(0,0,0,0.6)',
     fontSize: 13,
     fontWeight: '600',
     letterSpacing: 1,
@@ -475,15 +474,54 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   footerBtnText: {
-    color: '#FFFFFF',
+    color: '#1A1A1A',
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
   },
+  footerBtnWhatsapp: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#F7DE00',
+    shadowColor: '#F7DE00',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  footerBtnPhone: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#F7DE00',
+    shadowColor: '#F7DE00',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  footerBtnTextDark: {
+    color: '#1A1A1A',
+    fontWeight: '700',
+    fontSize: 14,
+  },
   versionText: {
     marginTop: 10,
     textAlign: 'center',
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(0,0,0,0.5)',
     fontSize: 11,
   },
 });

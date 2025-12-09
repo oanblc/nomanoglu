@@ -121,30 +121,53 @@ const FavoritesScreen = ({ navigation }) => {
     }, 300);
   };
 
-  const renderFavoriteItem = ({ item }) => (
-    <View style={styles.favoriteItem}>
-      <View style={styles.favoriteLeft}>
-        <Text style={styles.favoriteCode}>{item.code}</Text>
-        <Text style={styles.favoriteName}>{item.name}</Text>
-      </View>
-      <View style={styles.favoriteCenter}>
-        <View style={styles.priceColumn}>
-          <Text style={styles.priceLabel}>ALIŞ</Text>
-          <Text style={styles.favoritePrice}>{item.buying}</Text>
+  const renderFavoriteItem = ({ item }) => {
+    const isGold = item.code.includes('ALTIN') || item.code.includes('GUMUS');
+
+    return (
+      <View style={styles.favoriteCard}>
+        <View style={styles.favoriteCardContent}>
+          {/* Sol - İkon ve Bilgi */}
+          <LinearGradient
+            colors={[palette.headerGradientStart, palette.headerGradientEnd]}
+            style={styles.favoriteIconGradient}
+          >
+            <FontAwesome5
+              name={isGold ? 'coins' : 'dollar-sign'}
+              size={14}
+              color={palette.headerText}
+            />
+          </LinearGradient>
+
+          <View style={styles.favoriteInfo}>
+            <Text style={styles.favoriteCode}>{item.code}</Text>
+            <Text style={styles.favoriteName}>{item.name}</Text>
+          </View>
+
+          {/* Sağ - Fiyatlar */}
+          <View style={styles.favoritePrices}>
+            <View style={styles.priceItem}>
+              <Text style={styles.priceLabel}>ALIŞ</Text>
+              <Text style={styles.priceValue}>{item.buying}</Text>
+            </View>
+            <View style={styles.priceSeparator} />
+            <View style={styles.priceItem}>
+              <Text style={styles.priceLabel}>SATIŞ</Text>
+              <Text style={[styles.priceValue, styles.sellPrice]}>{item.selling}</Text>
+            </View>
+          </View>
+
+          {/* Sil Butonu */}
+          <TouchableOpacity
+            style={styles.deleteBtn}
+            onPress={() => removeFavorite(item.code)}
+          >
+            <FontAwesome5 name="times" size={14} color="#999" />
+          </TouchableOpacity>
         </View>
-        <View style={styles.priceColumn}>
-          <Text style={styles.priceLabel}>SATIŞ</Text>
-          <Text style={styles.favoritePrice}>{item.selling}</Text>
-        </View>
       </View>
-      <TouchableOpacity 
-        style={styles.removeButton}
-        onPress={() => removeFavorite(item.code)}
-      >
-        <FontAwesome5 name="trash" size={16} color={palette.headerGradientEnd} />
-      </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
@@ -156,8 +179,8 @@ const FavoritesScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={palette.headerGradientStart} />
-      
+      <StatusBar barStyle="dark-content" backgroundColor={palette.headerGradientStart} />
+
       {/* Fixed Header */}
       <LinearGradient
         colors={gradient}
@@ -167,19 +190,19 @@ const FavoritesScreen = ({ navigation }) => {
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color="#FFFFFF" />
+            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
           </TouchableOpacity>
-          
+
           <View style={styles.logoContainer}>
-            <Image 
-              source={require('../../assets/logo.png')} 
+            <Image
+              source={require('../../assets/logo.png')}
               style={styles.headerLogoImage}
               resizeMode="contain"
             />
           </View>
-          
+
           <TouchableOpacity style={styles.iconButton} onPress={() => setAddModalVisible(true)}>
-            <FontAwesome5 name="plus" size={24} color="#FFFFFF" />
+            <FontAwesome5 name="plus" size={24} color={palette.headerText} />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -192,7 +215,7 @@ const FavoritesScreen = ({ navigation }) => {
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: 60 + insets.bottom + 10 }
+          { padding: 16, paddingBottom: 60 + insets.bottom + 10 }
         ]}
       />
 
@@ -226,7 +249,7 @@ const FavoritesScreen = ({ navigation }) => {
                     resizeMode="contain"
                   />
                   <TouchableOpacity onPress={closeDrawer} style={styles.closeButton}>
-                    <FontAwesome5 name="times" size={20} color="#FFFFFF" />
+                    <FontAwesome5 name="times" size={20} color={palette.headerText} />
                   </TouchableOpacity>
                 </View>
 
@@ -236,50 +259,50 @@ const FavoritesScreen = ({ navigation }) => {
                 <View style={styles.menuList}>
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('home')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="home" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="home" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Ana Sayfa</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('markets')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="chart-line" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="chart-line" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Piyasalar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('favorites')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="star" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="star" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Favorilerim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('alarms')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="bell" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="bell" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Alarmlar</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('about')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="info-circle" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="info-circle" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>Kurumsal</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modernMenuItem} onPress={() => handleMenuPress('contact')}>
                     <View style={styles.menuIconBox}>
-                      <FontAwesome5 name="envelope" size={18} color="#FFFFFF" />
+                      <FontAwesome5 name="envelope" size={18} color={palette.headerText} />
                     </View>
                     <Text style={styles.modernMenuText}>İletişim</Text>
-                    <FontAwesome5 name="chevron-right" size={12} color="rgba(255,255,255,0.5)" />
+                    <FontAwesome5 name="chevron-right" size={12} color="rgba(0,0,0,0.3)" />
                   </TouchableOpacity>
                 </View>
 
@@ -287,20 +310,20 @@ const FavoritesScreen = ({ navigation }) => {
                 <View style={[styles.modernFooter, { paddingBottom: insets.bottom + 20 }]}>
                   <Text style={styles.footerTitle}>BİZE ULAŞIN</Text>
                   <View style={styles.footerButtons}>
-                    <TouchableOpacity 
-                      style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                    <TouchableOpacity
+                      style={styles.footerBtnWhatsapp}
                       onPress={() => handleMenuPress('whatsapp')}
                     >
-                      <FontAwesome5 name="whatsapp" size={20} color="#fff" />
-                      <Text style={styles.footerBtnText}>WhatsApp</Text>
+                      <FontAwesome5 name="whatsapp" size={18} color="#F7DE00" />
+                      <Text style={styles.footerBtnTextDark}>WhatsApp</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity 
-                      style={[styles.footerBtn, { backgroundColor: palette.headerGradientEnd }]} 
+                    <TouchableOpacity
+                      style={styles.footerBtnPhone}
                       onPress={() => handleMenuPress('phone')}
                     >
-                      <FontAwesome5 name="phone" size={18} color="#fff" />
-                      <Text style={styles.footerBtnText}>Ara</Text>
+                      <FontAwesome5 name="phone" size={16} color="#F7DE00" />
+                      <Text style={styles.footerBtnTextDark}>Ara</Text>
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.versionText}>v1.0.0 • Nomanoğlu Altın</Text>
@@ -411,6 +434,80 @@ const styles = StyleSheet.create({
   listContent: {
     flexGrow: 1,
   },
+  // Compact Favorite Card Styles
+  favoriteCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(247, 222, 0, 0.12)',
+  },
+  favoriteCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  favoriteIconGradient: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  favoriteInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  favoriteCode: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    letterSpacing: 0.3,
+  },
+  favoriteName: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 2,
+  },
+  favoritePrices: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  priceItem: {
+    alignItems: 'center',
+    minWidth: 50,
+  },
+  priceValue: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  sellPrice: {
+    color: '#F7DE00',
+  },
+  priceSeparator: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E8E8E8',
+    marginHorizontal: 10,
+  },
+  deleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  // Legacy styles
   favoriteItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -423,16 +520,6 @@ const styles = StyleSheet.create({
   },
   favoriteLeft: {
     flex: 1,
-  },
-  favoriteCode: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  favoriteName: {
-    fontSize: 11,
-    color: '#888',
   },
   favoriteCenter: {
     flexDirection: 'row',
@@ -497,7 +584,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   drawerHeader: {
     paddingHorizontal: 20,
@@ -671,13 +758,12 @@ const styles = StyleSheet.create({
   modernLogo: {
     width: 180,
     height: 52,
-    tintColor: '#FFFFFF',
   },
   closeButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -695,13 +781,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   modernMenuText: {
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#1A1A1A',
   },
   modernFooter: {
     paddingHorizontal: 18,
@@ -710,7 +796,7 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.9)',
+    color: 'rgba(0,0,0,0.6)',
     marginBottom: 8,
     letterSpacing: 1,
   },
@@ -733,7 +819,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   footerBtnText: {
-    color: '#FFFFFF',
+    color: '#1A1A1A',
     fontWeight: '600',
     fontSize: 14,
     marginLeft: 8,
@@ -742,11 +828,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
     fontSize: 11,
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(0,0,0,0.5)',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.35)',
+    backgroundColor: 'rgba(0,0,0,0.15)',
     marginHorizontal: 18,
     marginBottom: 8,
   },
@@ -805,6 +891,35 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     color: palette.headerGradientStart,
+  },
+  footerBtnWhatsapp: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#25D366',
+  },
+  footerBtnPhone: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#F7DE00',
+  },
+  footerBtnTextDark: {
+    color: '#1A1A1A',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });
 
