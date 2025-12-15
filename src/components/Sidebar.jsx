@@ -68,7 +68,7 @@ const Sidebar = forwardRef(({ navigation }, ref) => {
       } else if (action === 'about' && navigation) {
         navigation.navigate('Hakkimizda');
       } else if (action === 'home' && navigation) {
-        navigation.navigate('AnaSayfa');
+        navigation.navigate('MainTabs', { screen: 'AnaSayfa' });
       }
     }, 300);
   };

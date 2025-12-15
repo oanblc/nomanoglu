@@ -1,29 +1,58 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, ScrollView, StatusBar, TextInput, Alert, Image } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, ScrollView, StatusBar, TextInput, Alert, Image, Linking } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { palette, gradient } from '../../theme/colors';
+import { typography } from '../../theme/fonts';
 import { sendTestNotification } from '../services/NotificationService';
 import Sidebar from '../components/Sidebar';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 const ALARMS_KEY = '@alarms';
+
+// Helper to format prices
+const formatPrice = (value) => {
+  if (!value) return '0,0000';
+  return new Intl.NumberFormat('tr-TR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 4,
+  }).format(value);
+};
 
 const AlarmsScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const sidebarRef = useRef(null);
   const [alarms, setAlarms] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const { prices, isConnected } = useWebSocket();
+
+  // Backend'den gelen fiyatları formatla
+  const allPrices = useMemo(() => {
+    if (!prices || prices.length === 0) return [];
+
+    return prices.map(p => ({
+      code: p.code,
+      name: p.name || p.code,
+      buying: formatPrice(p.calculatedAlis),
+      selling: formatPrice(p.calculatedSatis),
+    }));
+  }, [prices]);
 
   useEffect(() => {
     loadAlarms();
-  }, []);
+    // Sayfa her odaklandığında alarmları yenile
+    if (navigation && navigation.addListener) {
+      const unsubscribe = navigation.addListener('focus', loadAlarms);
+      return unsubscribe;
+    }
+  }, [navigation]);
 
   const [selectedPrice, setSelectedPrice] = useState(null);
   const [targetPrice, setTargetPrice] = useState('');
-  const [condition, setCondition] = useState('above'); // 'above' or 'below'
-  const [priceType, setPriceType] = useState('selling'); // 'buying' or 'selling'
+  const [condition, setCondition] = useState('above');
+  const [priceType, setPriceType] = useState('selling');
 
   const loadAlarms = async () => {
     try {
@@ -35,16 +64,6 @@ const AlarmsScreen = ({ navigation }) => {
       console.log('Alarmlar yüklenemedi:', error);
     }
   };
-
-  const ALL_PRICES = [
-    { code: 'USDTRY', name: 'Amerikan Doları', buying: '42,300', selling: '42,430' },
-    { code: 'EURTRY', name: 'Euro', buying: '48,934', selling: '49,200' },
-    { code: 'GBPTRY', name: 'İngiliz Sterlini', buying: '55,650', selling: '56,110' },
-    { code: 'CHFTRY', name: 'İsviçre Frangı', buying: '52,004', selling: '52,866' },
-    { code: 'JPYTRY', name: 'Japon Yeni', buying: '0,2690', selling: '0,2712' },
-    { code: 'ALTIN', name: 'Gram Altın', buying: '3,240', selling: '3,245' },
-    { code: 'GUMUSTRY', name: 'Gümüş', buying: '42,10', selling: '42,15' },
-  ];
 
   const createAlarm = async () => {
     if (!selectedPrice || !targetPrice) {
@@ -65,8 +84,7 @@ const AlarmsScreen = ({ navigation }) => {
       const updated = [...alarms, newAlarm];
       await AsyncStorage.setItem(ALARMS_KEY, JSON.stringify(updated));
       setAlarms(updated);
-      
-      // Reset form
+
       setSelectedPrice(null);
       setTargetPrice('');
       setCondition('above');
@@ -91,6 +109,22 @@ const AlarmsScreen = ({ navigation }) => {
     sidebarRef.current?.open();
   };
 
+  const goToHome = () => {
+    navigation.navigate('MainTabs', { screen: 'AnaSayfa' });
+  };
+
+  const openInstagram = () => {
+    Linking.openURL('https://www.instagram.com/nomanoglukuyumcu/');
+  };
+
+  const openTikTok = () => {
+    Linking.openURL('https://www.tiktok.com/@nomanoglukuyumcu');
+  };
+
+  const openWebsite = () => {
+    Linking.openURL('https://www.nomanoglu.com.tr/');
+  };
+
   const handleTestNotification = async () => {
     try {
       await sendTestNotification();
@@ -109,7 +143,7 @@ const AlarmsScreen = ({ navigation }) => {
       <FontAwesome5 name="bell-slash" size={80} color="#e0e0e0" />
       <Text style={styles.emptyTitle}>Henüz alarm oluşturmadınız</Text>
       <Text style={styles.emptySubtitle}>Sağ üstteki + simgesine tıklayarak alarm oluşturabilirsiniz</Text>
-      
+
       <TouchableOpacity style={styles.createButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.createButtonText}>ALARM OLUŞTUR</Text>
       </TouchableOpacity>
@@ -123,9 +157,9 @@ const AlarmsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={palette.headerGradientStart} />
+      <StatusBar barStyle="light-content" backgroundColor={palette.headerGradientStart} />
 
-      {/* Fixed Header */}
+      {/* Header - Piyasalar sayfasıyla aynı */}
       <LinearGradient
         colors={gradient}
         start={{ x: 0, y: 0 }}
@@ -152,71 +186,125 @@ const AlarmsScreen = ({ navigation }) => {
       </LinearGradient>
 
       {alarms.length === 0 ? (
-        renderEmpty()
+        <View style={styles.emptyWrapper}>
+          {renderEmpty()}
+        </View>
       ) : (
         <FlatList
           data={alarms}
           renderItem={({ item }) => {
-            const priceInfo = ALL_PRICES.find(p => p.code === item.code);
+            const priceInfo = allPrices.find(p => p.code === item.code);
             const currentPrice = priceInfo
               ? (item.priceType === 'Alış' ? priceInfo.buying : priceInfo.selling)
               : '-';
             const isAbove = item.condition === '>';
+            const isTriggered = item.triggered === true;
+
+            // Tetiklenme tarihini formatla
+            const formatTriggeredDate = (dateStr) => {
+              if (!dateStr) return '';
+              const date = new Date(dateStr);
+              return date.toLocaleDateString('tr-TR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+            };
 
             return (
-              <View style={styles.alarmCard}>
-                {/* Üst Kısım - Kod ve İkon */}
+              <View style={[
+                styles.alarmCard,
+                isTriggered && styles.alarmCardTriggered
+              ]}>
+                {/* Tetiklendi banner */}
+                {isTriggered && (
+                  <View style={styles.triggeredBanner}>
+                    <FontAwesome5 name="check-circle" size={14} color="#FFFFFF" />
+                    <Text style={styles.triggeredBannerText}>Tetiklendi</Text>
+                    <Text style={styles.triggeredBannerDate}>
+                      {formatTriggeredDate(item.triggeredAt)}
+                    </Text>
+                  </View>
+                )}
+
                 <View style={styles.alarmCardHeader}>
-                  <View style={styles.alarmIconContainer}>
-                    <LinearGradient
-                      colors={[palette.headerGradientStart, palette.headerGradientEnd]}
-                      style={styles.alarmIconGradient}
-                    >
-                      <FontAwesome5
-                        name={item.code.includes('ALTIN') || item.code.includes('GUMUS') ? 'coins' : 'dollar-sign'}
-                        size={16}
-                        color={palette.headerText}
-                      />
-                    </LinearGradient>
-                  </View>
                   <View style={styles.alarmHeaderText}>
-                    <Text style={styles.alarmCode}>{item.code}</Text>
-                    <Text style={styles.alarmName}>{item.name}</Text>
+                    <Text style={[
+                      styles.alarmCode,
+                      isTriggered && styles.alarmCodeTriggered
+                    ]}>{item.code}</Text>
+                    <Text style={[
+                      styles.alarmName,
+                      isTriggered && styles.alarmNameTriggered
+                    ]}>{item.name}</Text>
                   </View>
-                  <View style={styles.alarmBadge}>
+                  <View style={[
+                    styles.alarmBadge,
+                    isTriggered && styles.alarmBadgeTriggered
+                  ]}>
                     <FontAwesome5
                       name={isAbove ? 'arrow-up' : 'arrow-down'}
                       size={10}
-                      color={isAbove ? '#22C55E' : '#EF4444'}
+                      color={isTriggered ? '#9CA3AF' : (isAbove ? '#22C55E' : '#EF4444')}
                     />
-                    <Text style={[styles.alarmBadgeText, { color: isAbove ? '#22C55E' : '#EF4444' }]}>
-                      {isAbove ? 'Üstüne Çıkarsa' : 'Altına Düşerse'}
+                    <Text style={[
+                      styles.alarmBadgeText,
+                      { color: isTriggered ? '#9CA3AF' : (isAbove ? '#22C55E' : '#EF4444') }
+                    ]}>
+                      {isAbove ? 'Üstüne Çıktı' : 'Altına Düştü'}
                     </Text>
                   </View>
                 </View>
 
-                {/* Fiyat Bilgileri */}
-                <View style={styles.alarmPriceContainer}>
+                <View style={[
+                  styles.alarmPriceContainer,
+                  isTriggered && styles.alarmPriceContainerTriggered
+                ]}>
                   <View style={styles.alarmPriceBox}>
-                    <Text style={styles.alarmPriceBoxLabel}>GÜNCEL FİYAT</Text>
-                    <Text style={styles.alarmPriceBoxValue}>{currentPrice}</Text>
+                    <Text style={styles.alarmPriceBoxLabel}>
+                      {isTriggered ? 'TETİKLENDİĞİ FİYAT' : 'GÜNCEL FİYAT'}
+                    </Text>
+                    <Text style={[
+                      styles.alarmPriceBoxValue,
+                      isTriggered && styles.alarmPriceBoxValueTriggered
+                    ]}>{currentPrice}</Text>
                     <Text style={styles.alarmPriceBoxSub}>{item.priceType}</Text>
                   </View>
-                  <View style={styles.alarmPriceDivider}>
-                    <FontAwesome5 name="exchange-alt" size={14} color="#F7DE00" />
+                  <View style={[
+                    styles.alarmPriceDivider,
+                    isTriggered && styles.alarmPriceDividerTriggered
+                  ]}>
+                    <FontAwesome5
+                      name={isTriggered ? "check" : "exchange-alt"}
+                      size={14}
+                      color={isTriggered ? "#22C55E" : "#F7DE00"}
+                    />
                   </View>
                   <View style={styles.alarmPriceBox}>
                     <Text style={styles.alarmPriceBoxLabel}>HEDEF FİYAT</Text>
-                    <Text style={[styles.alarmPriceBoxValue, styles.alarmTargetValue]}>{item.targetPrice}</Text>
+                    <Text style={[
+                      styles.alarmPriceBoxValue,
+                      isTriggered ? styles.alarmPriceBoxValueTriggered : styles.alarmTargetValue
+                    ]}>{item.targetPrice}</Text>
                     <Text style={styles.alarmPriceBoxSub}>{item.priceType}</Text>
                   </View>
                 </View>
 
-                {/* Alt Kısım - Aksiyon */}
                 <View style={styles.alarmCardFooter}>
                   <View style={styles.alarmStatusContainer}>
-                    <View style={styles.alarmStatusDot} />
-                    <Text style={styles.alarmStatusText}>Aktif</Text>
+                    {isTriggered ? (
+                      <>
+                        <View style={styles.alarmStatusDotTriggered} />
+                        <Text style={styles.alarmStatusTextTriggered}>Tamamlandı</Text>
+                      </>
+                    ) : (
+                      <>
+                        <View style={styles.alarmStatusDot} />
+                        <Text style={styles.alarmStatusText}>Aktif</Text>
+                      </>
+                    )}
                   </View>
                   <TouchableOpacity
                     style={styles.alarmDeleteButton}
@@ -230,14 +318,37 @@ const AlarmsScreen = ({ navigation }) => {
             );
           }}
           keyExtractor={item => item.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 60 + insets.bottom + 10 }}
+          contentContainerStyle={{ padding: 16 }}
         />
       )}
+
+      {/* Bottom Tab Bar */}
+      <View style={[styles.bottomTabBar, { paddingBottom: insets.bottom > 0 ? insets.bottom + 4 : 8 }]}>
+        <TouchableOpacity style={styles.tabItem} onPress={goToHome}>
+          <FontAwesome5 name="home" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Ana Sayfa</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openInstagram}>
+          <FontAwesome5 name="instagram" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Instagram</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openTikTok}>
+          <FontAwesome5 name="tiktok" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>TikTok</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openWebsite}>
+          <FontAwesome5 name="globe" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Web Sitesi</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Sidebar */}
       <Sidebar ref={sidebarRef} navigation={navigation} />
 
-      {/* Create Alarm Modal */}
+      {/* Create Alarm Modal - Backend fiyatlarıyla */}
       <Modal
         visible={modalVisible}
         transparent
@@ -245,7 +356,7 @@ const AlarmsScreen = ({ navigation }) => {
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.createModalContainer}>
-          <View style={styles.createModalContent}>
+          <View style={[styles.createModalContent, { paddingBottom: insets.bottom > 0 ? insets.bottom : 20 }]}>
             <View style={styles.createModalHeader}>
               <Text style={styles.createModalTitle}>Alarm Oluştur</Text>
               <TouchableOpacity onPress={() => {
@@ -258,16 +369,16 @@ const AlarmsScreen = ({ navigation }) => {
                 <FontAwesome5 name="times" size={24} color="#333" />
               </TouchableOpacity>
             </View>
-            
-            <ScrollView style={styles.createModalBody}>
+
+            <ScrollView style={styles.createModalBody} contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={true}>
               {/* Select Price */}
               <Text style={styles.formLabel}>Fiyat Seçin</Text>
-              <ScrollView 
-                horizontal 
+              <ScrollView
+                horizontal
                 showsHorizontalScrollIndicator={false}
                 style={styles.priceSelector}
               >
-                {ALL_PRICES.map((price, index) => (
+                {allPrices.map((price, index) => (
                   <TouchableOpacity
                     key={index}
                     style={[
@@ -280,11 +391,17 @@ const AlarmsScreen = ({ navigation }) => {
                       styles.priceChipText,
                       selectedPrice?.code === price.code && styles.priceChipTextSelected
                     ]}>
-                      {price.code}
+                      {price.name}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
+
+              {allPrices.length === 0 && (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>Fiyatlar yükleniyor...</Text>
+                </View>
+              )}
 
               {/* Show current prices if a currency is selected */}
               {selectedPrice && (
@@ -311,10 +428,10 @@ const AlarmsScreen = ({ navigation }) => {
                   ]}
                   onPress={() => setPriceType('buying')}
                 >
-                  <FontAwesome5 
-                    name="arrow-down" 
-                    size={16} 
-                    color={priceType === 'buying' ? '#FFFFFF' : palette.headerGradientStart} 
+                  <FontAwesome5
+                    name="arrow-down"
+                    size={16}
+                    color={priceType === 'buying' ? '#FFFFFF' : palette.headerGradientStart}
                   />
                   <Text style={[
                     styles.conditionText,
@@ -331,10 +448,10 @@ const AlarmsScreen = ({ navigation }) => {
                   ]}
                   onPress={() => setPriceType('selling')}
                 >
-                  <FontAwesome5 
-                    name="arrow-up" 
-                    size={16} 
-                    color={priceType === 'selling' ? '#FFFFFF' : palette.headerGradientStart} 
+                  <FontAwesome5
+                    name="arrow-up"
+                    size={16}
+                    color={priceType === 'selling' ? '#FFFFFF' : palette.headerGradientStart}
                   />
                   <Text style={[
                     styles.conditionText,
@@ -355,10 +472,10 @@ const AlarmsScreen = ({ navigation }) => {
                   ]}
                   onPress={() => setCondition('above')}
                 >
-                  <FontAwesome5 
-                    name="arrow-up" 
-                    size={16} 
-                    color={condition === 'above' ? '#FFFFFF' : palette.headerGradientStart} 
+                  <FontAwesome5
+                    name="arrow-up"
+                    size={16}
+                    color={condition === 'above' ? '#FFFFFF' : palette.headerGradientStart}
                   />
                   <Text style={[
                     styles.conditionText,
@@ -375,10 +492,10 @@ const AlarmsScreen = ({ navigation }) => {
                   ]}
                   onPress={() => setCondition('below')}
                 >
-                  <FontAwesome5 
-                    name="arrow-down" 
-                    size={16} 
-                    color={condition === 'below' ? '#FFFFFF' : palette.headerGradientStart} 
+                  <FontAwesome5
+                    name="arrow-down"
+                    size={16}
+                    color={condition === 'below' ? '#FFFFFF' : palette.headerGradientStart}
                   />
                   <Text style={[
                     styles.conditionText,
@@ -425,10 +542,10 @@ const AlarmsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.screenBackground,
   },
   header: {
-    paddingBottom: 0,
+    paddingBottom: 15,
   },
   topBar: {
     flexDirection: 'row',
@@ -450,19 +567,8 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
   },
-  logo: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    letterSpacing: 2,
-    fontWeight: '400',
-    fontFamily: 'serif',
-  },
-  subtitle: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    letterSpacing: 3,
-    marginTop: 2,
-    fontWeight: '300',
+  emptyWrapper: {
+    flex: 1,
   },
   empty: {
     flex: 1,
@@ -520,7 +626,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  // Premium Alarm Card Styles
+  bottomTabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#f9fafb',
+    paddingTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 12,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 70,
+    paddingVertical: 8,
+  },
+  tabLabel: {
+    ...typography.navLabel,
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 2,
+    color: palette.navInactive,
+  },
   alarmCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -539,16 +668,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#F5F5F5',
-  },
-  alarmIconContainer: {
-    marginRight: 12,
-  },
-  alarmIconGradient: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   alarmHeaderText: {
     flex: 1,
@@ -654,61 +773,60 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#EF4444',
   },
-  // Legacy styles (keeping for compatibility)
-  alarmItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    backgroundColor: 'transparent',
+  // Tetiklenen alarm stilleri
+  alarmCardTriggered: {
+    backgroundColor: '#F8FAF8',
+    borderColor: 'rgba(34, 197, 94, 0.2)',
+    opacity: 0.9,
   },
-  alarmLeft: {
+  triggeredBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#22C55E',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    gap: 8,
+  },
+  triggeredBannerText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
     flex: 1,
   },
-  alarmCenter: {
-    alignItems: 'flex-end',
-    marginRight: 12,
+  triggeredBannerDate: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.85)',
   },
-  alarmPriceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 2,
+  alarmCodeTriggered: {
+    color: '#6B7280',
   },
-  alarmPriceLabel: {
-    fontSize: 10,
-    color: '#888',
-    fontWeight: '700',
-    marginRight: 6,
+  alarmNameTriggered: {
+    color: '#9CA3AF',
   },
-  alarmPriceValue: {
-    fontSize: 14,
+  alarmBadgeTriggered: {
+    backgroundColor: '#F3F4F6',
+  },
+  alarmPriceContainerTriggered: {
+    backgroundColor: '#F3F4F6',
+  },
+  alarmPriceBoxValueTriggered: {
+    color: '#6B7280',
+  },
+  alarmPriceDividerTriggered: {
+    backgroundColor: '#E8F5E9',
+  },
+  alarmStatusDotTriggered: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#9CA3AF',
+  },
+  alarmStatusTextTriggered: {
+    fontSize: 13,
     fontWeight: '600',
-    color: palette.headerGradientStart,
-  },
-  alarmActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  alarmCode: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  alarmCondition: {
-    fontSize: 12,
-    color: '#888',
-    marginBottom: 4,
-  },
-  alarmTarget: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: palette.headerGradientStart,
-  },
-  deleteButton: {
-    padding: 8,
+    color: '#9CA3AF',
   },
   createModalContainer: {
     flex: 1,
@@ -719,7 +837,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    height: '85%',
+    height: '80%',
   },
   createModalHeader: {
     flexDirection: 'row',
@@ -736,7 +854,8 @@ const styles = StyleSheet.create({
   },
   createModalBody: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
   formLabel: {
     fontSize: 14,
@@ -768,6 +887,14 @@ const styles = StyleSheet.create({
   },
   priceChipTextSelected: {
     color: '#FFFFFF',
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#888',
   },
   conditionContainer: {
     flexDirection: 'row',
@@ -810,7 +937,6 @@ const styles = StyleSheet.create({
   },
   fixedButtonContainer: {
     padding: 20,
-    paddingBottom: 30,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',

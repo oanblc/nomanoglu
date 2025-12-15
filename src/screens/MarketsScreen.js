@@ -1,11 +1,12 @@
 import React, { useMemo, useRef } from 'react';
-import { View, StyleSheet, StatusBar, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, StatusBar, TouchableOpacity, Image, Text, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
 import PriceList from '../components/PriceList';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { palette, gradient } from '../../theme/colors';
+import { typography } from '../../theme/fonts';
 import Sidebar from '../components/Sidebar';
 
 // Helper to format prices
@@ -17,47 +18,68 @@ const formatPrice = (value) => {
   }).format(value);
 };
 
-// Initial Mock Data
-const INITIAL_DATA = [
-  { code: 'USDTRY', name: 'Amerikan Doları', buying: '42,300', selling: '42,430', percent: '%0.00', time: '14:15' },
-  { code: 'EURTRY', name: 'Euro', buying: '48,934', selling: '49,200', percent: '%0.00', time: '14:15' },
-  { code: 'EURUSD', name: 'EUR/USD', buying: '1,1568', selling: '1,1595', percent: '%0.00', time: '14:15' },
-  { code: 'GBPTRY', name: 'İngiliz Sterlini', buying: '55,650', selling: '56,110', percent: '%0.00', time: '14:15' },
-  { code: 'CHFTRY', name: 'İsviçre Frangı', buying: '52,004', selling: '52,866', percent: '%0.00', time: '14:15' },
-  { code: 'AUDTRY', name: 'Avustralya Doları', buying: '26,861', selling: '27,724', percent: '%0.00', time: '14:15' },
-  { code: 'CADTRY', name: 'Kanada Doları', buying: '29,735', selling: '31,714', percent: '%0.00', time: '14:15' },
-  { code: 'SARTRY', name: 'Suudi Arabistan Riyali', buying: '11,117', selling: '11,657', percent: '%0.00', time: '14:15' },
-  { code: 'JPYTRY', name: 'Japon Yeni', buying: '0,2690', selling: '0,2712', percent: '%0.00', time: '14:15' },
-  { code: 'CNYTR', name: 'Çin Yuanı', buying: '5,845', selling: '5,912', percent: '%0.00', time: '14:15' },
-];
+// Alış-Satış farkını yüzde olarak hesapla (spread)
+const calculateSpreadPercent = (alis, satis) => {
+  if (!alis || !satis || alis === 0) return { percent: '0.00', isPositive: true };
+  const spread = ((satis - alis) / alis) * 100;
+  return {
+    percent: Math.abs(spread).toFixed(2),
+    isPositive: spread >= 0
+  };
+};
+
+// Initial placeholder - Backend'den yüklenecek
+const INITIAL_DATA = [];
 
 const MarketsScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { prices } = useWebSocket();
+  const { prices, isConnected } = useWebSocket();
   const sidebarRef = useRef(null);
 
+  // Backend'den gelen fiyatları formatla - alış-satış fark yüzdesini hesapla (spread)
   const displayData = useMemo(() => {
     if (!prices || prices.length === 0) return INITIAL_DATA;
 
-    return prices.map(p => ({
-      code: p.code,
-      name: p.name || p.code,
-      buying: formatPrice(p.calculatedAlis),
-      selling: formatPrice(p.calculatedSatis),
-      percent: '%0.00',
-      time: '14:15'
-    }));
+    return prices.map(p => {
+      const spreadInfo = calculateSpreadPercent(p.calculatedAlis, p.calculatedSatis);
+      return {
+        code: p.code,
+        name: p.name || p.code,
+        buying: formatPrice(p.calculatedAlis),
+        selling: formatPrice(p.calculatedSatis),
+        percent: `%${spreadInfo.percent}`,
+        isPositive: spreadInfo.isPositive,
+        hasChange: true,
+        time: '14:15'
+      };
+    });
   }, [prices]);
 
   const openDrawer = () => {
     sidebarRef.current?.open();
   };
 
+  const goToHome = () => {
+    navigation.navigate('MainTabs', { screen: 'AnaSayfa' });
+  };
+
+  const openInstagram = () => {
+    Linking.openURL('https://www.instagram.com/nomanoglukuyumcu/');
+  };
+
+  const openTikTok = () => {
+    Linking.openURL('https://www.tiktok.com/@nomanoglukuyumcu');
+  };
+
+  const openWebsite = () => {
+    Linking.openURL('https://www.nomanoglu.com.tr/');
+  };
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={palette.headerGradientStart} />
+      <StatusBar barStyle="light-content" backgroundColor={palette.headerGradientStart} />
 
-      {/* Fixed Header with Menu */}
+      {/* Header with Menu Icon and Logo - No Slider */}
       <LinearGradient
         colors={gradient}
         start={{ x: 0, y: 0 }}
@@ -81,8 +103,33 @@ const MarketsScreen = ({ navigation }) => {
         </View>
       </LinearGradient>
 
-      {/* Price List */}
-      <PriceList data={displayData} topRates={[]} showHeader={false} />
+      {/* Price List - No Header/Slider */}
+      <View style={styles.priceListContainer}>
+        <PriceList data={displayData} topRates={[]} showHeader={false} navigation={navigation} />
+      </View>
+
+      {/* Bottom Tab Bar - Same as HomeScreen */}
+      <View style={[styles.bottomTabBar, { paddingBottom: insets.bottom > 0 ? insets.bottom + 4 : 8 }]}>
+        <TouchableOpacity style={styles.tabItem} onPress={goToHome}>
+          <FontAwesome5 name="home" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Ana Sayfa</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openInstagram}>
+          <FontAwesome5 name="instagram" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Instagram</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openTikTok}>
+          <FontAwesome5 name="tiktok" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>TikTok</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openWebsite}>
+          <FontAwesome5 name="globe" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Web Sitesi</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Sidebar Component */}
       <Sidebar ref={sidebarRef} navigation={navigation} />
@@ -96,7 +143,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.screenBackground,
   },
   header: {
-    paddingBottom: 0,
+    paddingBottom: 15,
   },
   topBar: {
     flexDirection: 'row',
@@ -117,6 +164,33 @@ const styles = StyleSheet.create({
   headerLogoImage: {
     width: 180,
     height: 180,
+  },
+  priceListContainer: {
+    flex: 1,
+  },
+  bottomTabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#f9fafb',
+    paddingTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 12,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 70,
+    paddingVertical: 8,
+  },
+  tabLabel: {
+    ...typography.navLabel,
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 2,
+    color: palette.navInactive,
   },
 });
 

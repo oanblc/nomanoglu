@@ -3,58 +3,34 @@ import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Animated, D
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { palette, gradient } from '../../theme/colors';
 import { typography } from '../../theme/fonts';
+import { getUnreadNotificationCount } from '../services/NotificationService';
 
 const { width } = Dimensions.get('window');
 const DRAWER_WIDTH = width * 0.75;
 
-const ALARMS_KEY = '@alarms';
-
-// Tüm mevcut fiyatlar (Hero kartları için Alış / Satış)
-const ALL_PRICES = [
-  { symbol: 'USDTRY', name: 'Dolar', buying: '42,300', selling: '42,430', percent: '%0.00' },
-  { symbol: 'EURTRY', name: 'Euro', buying: '48,934', selling: '49,200', percent: '%0.00' },
-  { symbol: 'JPYTRY', name: 'Japon Yeni', buying: '0,2690', selling: '0,2712', percent: '%0.00' },
-  { symbol: 'GBPTRY', name: 'Sterlin', buying: '55,650', selling: '56,110', percent: '%0.00' },
-  { symbol: 'CHFTRY', name: 'İsviçre Frangı', buying: '52,004', selling: '52,866', percent: '%0.00' },
-  { symbol: 'ALTIN', name: 'Gram Altın', buying: '3,240', selling: '3,245', percent: '%0.00' },
-  { symbol: 'GUMUSTRY', name: 'Gümüş', buying: '42,10', selling: '42,15', percent: '%0.00' },
-];
-
 const Header = ({ topRates = [], navigation }) => {
   const insets = useSafeAreaInsets();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [priceModalVisible, setPriceModalVisible] = useState(false);
   const [slideAnim] = useState(new Animated.Value(-DRAWER_WIDTH));
   const [overlayOpacity] = useState(new Animated.Value(0));
-  const [selectedPrices, setSelectedPrices] = useState([
-    ALL_PRICES[0], // USD
-    ALL_PRICES[1], // EUR
-    ALL_PRICES[2], // JPY
-  ]);
 
-  const [alarmCount, setAlarmCount] = useState(0);
+  const [notificationCount, setNotificationCount] = useState(0);
 
-  const loadAlarmCount = async () => {
+  const loadNotificationCount = async () => {
     try {
-      const stored = await AsyncStorage.getItem(ALARMS_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setAlarmCount(Array.isArray(parsed) ? parsed.length : 0);
-      } else {
-        setAlarmCount(0);
-      }
+      const count = await getUnreadNotificationCount();
+      setNotificationCount(count);
     } catch (error) {
-      console.log('Alarm sayısı okunamadı:', error);
+      console.log('Bildirim sayısı okunamadı:', error);
     }
   };
 
   useEffect(() => {
-    loadAlarmCount();
+    loadNotificationCount();
     if (navigation && navigation.addListener) {
-      const unsubscribe = navigation.addListener('focus', loadAlarmCount);
+      const unsubscribe = navigation.addListener('focus', loadNotificationCount);
       return unsubscribe;
     }
   }, [navigation]);
@@ -108,21 +84,9 @@ const Header = ({ topRates = [], navigation }) => {
       } else if (action === 'about' && navigation) {
         navigation.navigate('Hakkimizda');
       } else if (action === 'home' && navigation) {
-        navigation.navigate('AnaSayfa');
+        navigation.navigate('MainTabs', { screen: 'AnaSayfa' });
       }
     }, 300);
-  };
-
-  const handlePriceSelect = (price) => {
-    if (selectedPrices.length < 4) {
-      setSelectedPrices([...selectedPrices, price]);
-    }
-    setPriceModalVisible(false);
-  };
-
-  const handleRemovePrice = (index) => {
-    const newPrices = selectedPrices.filter((_, i) => i !== index);
-    setSelectedPrices(newPrices);
   };
 
   return (
@@ -149,15 +113,15 @@ const Header = ({ topRates = [], navigation }) => {
             />
           </View>
           
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.iconButton}
-            onPress={() => navigation && navigation.navigate('Alarmlar')}
+            onPress={() => navigation && navigation.navigate('Bildirimler')}
           >
             <FontAwesome5 name="bell" size={24} color={palette.headerText} />
-            {alarmCount > 0 && (
-              <View style={styles.alarmBadge}>
-                <Text style={styles.alarmBadgeText}>
-                  {alarmCount > 99 ? '99+' : alarmCount}
+            {notificationCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>
+                  {notificationCount > 99 ? '99+' : notificationCount}
                 </Text>
               </View>
             )}
@@ -171,11 +135,10 @@ const Header = ({ topRates = [], navigation }) => {
           style={styles.heroRatesScroll}
           contentContainerStyle={styles.heroRatesContent}
         >
-          {selectedPrices.map((rate, index) => (
-            <TouchableOpacity
+          {topRates.slice(0, 3).map((rate, index) => (
+            <View
               key={index}
               style={styles.heroCard}
-              onLongPress={() => handleRemovePrice(index)}
             >
               <Text style={[styles.heroSymbol, typography.heroSymbol]}>{rate.symbol}</Text>
 
@@ -183,39 +146,34 @@ const Header = ({ topRates = [], navigation }) => {
                 <View style={styles.heroPriceCol}>
                   <Text style={styles.heroPriceLabel}>Alış</Text>
                   <Text style={styles.heroPriceText} numberOfLines={1}>
-                    {rate.buying}
+                    {rate.buying || rate.price}
                   </Text>
                 </View>
                 <View style={styles.heroPriceCol}>
                   <Text style={styles.heroPriceLabel}>Satış</Text>
                   <Text style={styles.heroPriceText} numberOfLines={1}>
-                    {rate.selling}
+                    {rate.selling || rate.price}
                   </Text>
                 </View>
               </View>
 
-              {/* Alış altında yüzde, Satış altında çizgi – aynı satırda ortalı */}
+              {/* Alış altında yüzde, Satış altında üçgen */}
               <View style={styles.heroFooterRow}>
                 <View style={styles.heroPriceCol}>
-                  <Text style={styles.percentGreen}>{rate.percent}</Text>
+                  <Text style={styles.percentText}>
+                    {rate.percent}
+                  </Text>
                 </View>
                 <View style={[styles.heroPriceCol, styles.heroFooterRightCol]}>
-                  <View style={styles.greenBar} />
+                  <FontAwesome5
+                    name={rate.isPositive !== false ? 'caret-up' : 'caret-down'}
+                    size={18}
+                    color={rate.isPositive !== false ? '#16a34a' : '#dc2626'}
+                  />
                 </View>
               </View>
-            </TouchableOpacity>
+            </View>
           ))}
-
-          {/* Add Price Button */}
-          {selectedPrices.length < 4 && (
-            <TouchableOpacity 
-              style={styles.addButton}
-              onPress={() => setPriceModalVisible(true)}
-            >
-              <FontAwesome5 name="plus" size={20} color={palette.headerText} />
-              <Text style={styles.addButtonText}>Ekle</Text>
-            </TouchableOpacity>
-          )}
         </ScrollView>
       </LinearGradient>
 
@@ -345,43 +303,6 @@ const Header = ({ topRates = [], navigation }) => {
         </View>
       </Modal>
 
-      {/* Price Selection Modal */}
-      <Modal
-        visible={priceModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setPriceModalVisible(false)}
-      >
-        <View style={styles.priceModalContainer}>
-          <View style={styles.priceModalContent}>
-            <View style={styles.priceModalHeader}>
-              <Text style={styles.priceModalTitle}>Fiyat Seçin</Text>
-              <TouchableOpacity onPress={() => setPriceModalVisible(false)}>
-                <FontAwesome5 name="times" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.priceList}>
-              {ALL_PRICES.filter(p => !selectedPrices.find(sp => sp.symbol === p.symbol)).map((price, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.priceOption}
-                  onPress={() => handlePriceSelect(price)}
-                >
-                  <View>
-                    <Text style={styles.priceOptionSymbol}>{price.symbol}</Text>
-                    <Text style={styles.priceOptionName}>{price.name}</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.priceOptionValue}>Alış: {price.buying}</Text>
-                    <Text style={styles.priceOptionValue}>Satış: {price.selling}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
     </>
   );
 };
@@ -421,19 +342,19 @@ const styles = StyleSheet.create({
     padding: 5,
     position: 'relative',
   },
-  alarmBadge: {
+  notificationBadge: {
     position: 'absolute',
-    top: -2,
-    right: -2,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: palette.headerGradientEnd,
+    top: -6,
+    right: -10,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 3,
+    paddingHorizontal: 4,
   },
-  alarmBadgeText: {
+  notificationBadgeText: {
     color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '700',
@@ -447,34 +368,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   heroCard: {
-    width: 135,
-    paddingHorizontal: 12,
+    width: 155,
+    paddingHorizontal: 10,
     paddingVertical: 8,
-    marginRight: 10,
+    marginRight: 8,
     borderRightWidth: 1.5,
     borderRightColor: 'rgba(0,0,0,0.15)',
   },
   heroSymbol: {
     color: palette.heroSymbol,
-    marginBottom: 6,
+    marginBottom: 4,
+    fontSize: 11,
+    fontWeight: '600',
   },
   heroPricesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   heroPriceCol: {
     flex: 1,
   },
   heroPriceLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: 'rgba(0,0,0,0.6)',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   heroPriceText: {
     color: palette.headerText,
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: '600',
   },
   heroFooterRow: {
@@ -486,31 +409,17 @@ const styles = StyleSheet.create({
   heroFooterRightCol: {
     alignItems: 'flex-start',
   },
-  percentGreen: {
-    color: palette.percentGreen,
+  percentText: {
     fontSize: 12,
+    fontWeight: '600',
+    color: '#1A1A1A', // Siyah
   },
-  greenBar: {
-    height: 2,
-    width: 22,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 1,
-  },
-  addButton: {
-    width: 110,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+  arrowIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.2)',
-    borderRadius: 8,
-    borderStyle: 'dashed',
-  },
-  addButtonText: {
-    color: palette.headerText,
-    fontSize: 12,
-    marginTop: 5,
   },
   // Drawer Styles
   modalContainer: {
@@ -683,57 +592,6 @@ const styles = StyleSheet.create({
   footerCopyright: {
     fontSize: 10,
     color: '#9CA3AF',
-  },
-  // Price Modal Styles
-  priceModalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  priceModalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '70%',
-  },
-  priceModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  priceModalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-  },
-  priceList: {
-    padding: 10,
-  },
-  priceOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  priceOptionSymbol: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  priceOptionName: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-  },
-  priceOptionValue: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: palette.headerGradientStart,
   },
   // Compact Sidebar Styles
   drawerHeader: {

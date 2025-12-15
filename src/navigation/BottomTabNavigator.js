@@ -1,23 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, Platform, TouchableOpacity, Linking } from 'react-native';
-import { FontAwesome6, FontAwesome5 } from '@expo/vector-icons';
+import { Linking } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../screens/HomeScreen';
-import MarketsScreen from '../screens/MarketsScreen';
-import AlarmsScreen from '../screens/AlarmsScreen';
-import FavoritesScreen from '../screens/FavoritesScreen';
-import AboutScreen from '../screens/AboutScreen';
-import ContactScreen from '../screens/ContactScreen';
 import { palette } from '../../theme/colors';
 import { typography } from '../../theme/fonts';
 
 const Tab = createBottomTabNavigator();
-
-// External link tab component
-const ExternalLinkTab = ({ url, children }) => {
-  return null; // This is just a placeholder, actual navigation handled by listener
-};
 
 const BottomTabNavigator = () => {
   const insets = useSafeAreaInsets();
@@ -32,14 +22,9 @@ const BottomTabNavigator = () => {
         tabBarStyle: {
           backgroundColor: '#f9fafb',
           borderTopWidth: 0,
-          height: 56 + insets.bottom,
-          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
-          paddingTop: 4,
-          paddingHorizontal: 4,
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom + 4 : 8,
+          paddingTop: 8,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.08,
@@ -57,6 +42,7 @@ const BottomTabNavigator = () => {
         },
         tabBarItemStyle: {
           flex: 1,
+          minWidth: 70,
         },
       }}
     >
@@ -116,47 +102,6 @@ const BottomTabNavigator = () => {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome5 name="globe" size={20} color={color} />
           ),
-        }}
-      />
-      {/* Hidden screens - accessible from sidebar */}
-      <Tab.Screen
-        name="Piyasa"
-        component={MarketsScreen}
-        options={{
-          tabBarButton: () => null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
-      <Tab.Screen
-        name="Alarmlar"
-        component={AlarmsScreen}
-        options={{
-          tabBarButton: () => null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
-      <Tab.Screen
-        name="Favorilerim"
-        component={FavoritesScreen}
-        options={{
-          tabBarButton: () => null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
-      <Tab.Screen
-        name="Hakkimizda"
-        component={AboutScreen}
-        options={{
-          tabBarButton: () => null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
-      <Tab.Screen
-        name="Iletisim"
-        component={ContactScreen}
-        options={{
-          tabBarButton: () => null,
-          tabBarStyle: { display: 'none' },
         }}
       />
     </Tab.Navigator>

@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Image, Linking } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette, gradient } from '../../theme/colors';
+import { typography } from '../../theme/fonts';
 import Sidebar from '../components/Sidebar';
 
 const AboutScreen = ({ navigation }) => {
@@ -12,6 +13,22 @@ const AboutScreen = ({ navigation }) => {
 
   const openDrawer = () => {
     sidebarRef.current?.open();
+  };
+
+  const goToHome = () => {
+    navigation.navigate('MainTabs', { screen: 'AnaSayfa' });
+  };
+
+  const openInstagram = () => {
+    Linking.openURL('https://www.instagram.com/nomanoglukuyumcu/');
+  };
+
+  const openTikTok = () => {
+    Linking.openURL('https://www.tiktok.com/@nomanoglukuyumcu');
+  };
+
+  const openWebsite = () => {
+    Linking.openURL('https://www.nomanoglu.com.tr/');
   };
 
   return (
@@ -44,7 +61,7 @@ const AboutScreen = ({ navigation }) => {
 
       <ScrollView
         style={styles.content}
-        contentContainerStyle={{ paddingBottom: 60 + insets.bottom + 20 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Kurumsal Section */}
@@ -78,6 +95,29 @@ const AboutScreen = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Bottom Tab Bar */}
+      <View style={[styles.bottomTabBar, { paddingBottom: insets.bottom > 0 ? insets.bottom + 4 : 8 }]}>
+        <TouchableOpacity style={styles.tabItem} onPress={goToHome}>
+          <FontAwesome5 name="home" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Ana Sayfa</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openInstagram}>
+          <FontAwesome5 name="instagram" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Instagram</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openTikTok}>
+          <FontAwesome5 name="tiktok" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>TikTok</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={openWebsite}>
+          <FontAwesome5 name="globe" size={20} color={palette.navInactive} />
+          <Text style={styles.tabLabel}>Web Sitesi</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Sidebar Component */}
       <Sidebar ref={sidebarRef} navigation={navigation} />
@@ -185,6 +225,30 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     backgroundColor: '#e5e7eb',
+  },
+  bottomTabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#f9fafb',
+    paddingTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 12,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 70,
+    paddingVertical: 8,
+  },
+  tabLabel: {
+    ...typography.navLabel,
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 2,
+    color: palette.navInactive,
   },
 });
 

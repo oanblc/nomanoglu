@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, SectionList, Pressable } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, SectionList, Pressable, Animated } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette } from '../../theme/colors';
@@ -9,16 +9,13 @@ import Header from './Header'; // Import the Blue Header
 const ListHeader = () => (
   <View style={styles.listHeader}>
     <View style={styles.colLeft}>
-      <Text style={styles.listHeaderText}>Birim</Text>
+      <Text style={styles.listHeaderText}>Ürün</Text>
     </View>
     <View style={styles.colMid}>
-      <Text style={styles.listHeaderText}>Alış</Text>
+      <Text style={[styles.listHeaderText, { textAlign: 'right' }]}>Alış</Text>
     </View>
     <View style={styles.colRight}>
-      <Text style={styles.listHeaderText}>Satış</Text>
-    </View>
-    <View style={styles.colChange}>
-      <Text style={styles.listHeaderText}>Değişim</Text>
+      <Text style={[styles.listHeaderText, { textAlign: 'right' }]}>Satış</Text>
     </View>
   </View>
 );
@@ -34,37 +31,86 @@ const getPercentColor = (percent) => {
 };
 
 const PriceItem = ({ item }) => {
-  const percentColor = getPercentColor(item.percent);
+  // isPositive prop varsa onu kullan, yoksa yüzdeden hesapla
+  const percent = item.percent || '%0,00';
+  const numericPercent = parseFloat(percent.replace('%', '').replace(',', '.'));
+
+  // isPositive prop'u varsa onu kullan, yoksa yüzdeden belirle
+  const isPositive = item.isPositive !== undefined ? item.isPositive : numericPercent >= 0;
+  const hasChange = numericPercent !== 0;
+
+  // Renk belirleme - fiyatlar ve ok için
+  const priceColor = hasChange ? (isPositive ? '#16a34a' : '#dc2626') : '#9ca3af';
+  const arrowColor = priceColor;
+
+  // Fiyat değişim animasyonu
+  const flashAnim = useRef(new Animated.Value(0)).current;
+  const prevBuying = useRef(item.buying);
+  const prevSelling = useRef(item.selling);
+
+  useEffect(() => {
+    // Fiyat değişti mi kontrol et
+    if (prevBuying.current !== item.buying || prevSelling.current !== item.selling) {
+      // Sarı flash animasyonu
+      flashAnim.setValue(1);
+      Animated.timing(flashAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: false,
+      }).start();
+
+      // Önceki değerleri güncelle
+      prevBuying.current = item.buying;
+      prevSelling.current = item.selling;
+    }
+  }, [item.buying, item.selling]);
+
+  // Animasyonlu arka plan rengi
+  const backgroundColor = flashAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [palette.screenBackground, 'rgba(247, 222, 0, 0.25)'] // Hafif sarı
+  });
 
   return (
     <Pressable
       style={({ pressed }) => [
-        styles.itemContainer,
         pressed && styles.itemPressed,
       ]}
     >
-      {/* Left: Code + Name */}
-      <View style={styles.colLeft}>
-        <Text style={[styles.currencyCode, typography.currencyCode]}>{item.code}</Text>
-        <Text style={[styles.currencyName, typography.currencyName]}>{item.name}</Text>
-      </View>
+      <Animated.View style={[styles.itemContainer, { backgroundColor }]}>
+      {/* İki satırlı yapı */}
+      <View style={styles.itemContent}>
+        {/* Üst satır: Ürün adı | Alış | Satış */}
+        <View style={styles.topRow}>
+          <View style={styles.colLeft}>
+            <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
+          </View>
+          <View style={styles.colMid}>
+            <Text style={[styles.priceVal, { color: priceColor }]}>{item.buying}</Text>
+          </View>
+          <View style={styles.colRight}>
+            <Text style={[styles.priceValBold, { color: priceColor }]}>{item.selling}</Text>
+          </View>
+        </View>
 
-      {/* Mid: Buy Price */}
-      <View style={styles.colMid}>
-        <Text style={[styles.priceVal, typography.priceVal]}>{item.buying}</Text>
+        {/* Alt satır: Kod | Yüzde ve Değişim üçgeni */}
+        <View style={styles.bottomRow}>
+          <View style={styles.colLeft}>
+            <Text style={styles.productCode}>{item.code}</Text>
+          </View>
+          <View style={styles.changeContainer}>
+            <Text style={styles.percentText}>
+              {percent}
+            </Text>
+            <FontAwesome5
+              name={hasChange ? (isPositive ? 'caret-up' : 'caret-down') : 'minus'}
+              size={hasChange ? 18 : 12}
+              color={arrowColor}
+            />
+          </View>
+        </View>
       </View>
-
-      {/* Right: Sell Price */}
-      <View style={styles.colRight}>
-        <Text style={[styles.priceValBold, typography.priceVal]}>{item.selling}</Text>
-      </View>
-
-      {/* Change: Percent */}
-      <View style={styles.colChange}>
-        <Text style={[styles.percentChange, { color: percentColor }]}>
-          {item.percent || '%0,00'}
-        </Text>
-      </View>
+      </Animated.View>
     </Pressable>
   );
 };
@@ -104,74 +150,95 @@ const styles = StyleSheet.create({
   listHeader: {
     flexDirection: 'row',
     backgroundColor: palette.listHeaderBg,
-    paddingVertical: 6,
-    paddingHorizontal: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#d4d4d8', // biraz daha belirgin gri
+    borderBottomColor: '#d4d4d8',
     alignItems: 'center',
   },
   listHeaderText: {
     color: palette.listHeaderText,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   itemContainer: {
-    flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+    height: 60,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#d4d4d8', // satırlar arası ayırıcı daha belirgin
+    borderBottomColor: '#e5e7eb',
+    justifyContent: 'center',
+  },
+  itemContent: {
+    justifyContent: 'center',
+  },
+  topRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: palette.screenBackground,
-    minHeight: 52,
+    height: 20,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 18,
+    marginTop: 2,
   },
   colLeft: {
     flex: 1,
     justifyContent: 'center',
+    paddingRight: 8,
   },
   colMid: {
     width: 85,
     alignItems: 'flex-end',
     justifyContent: 'center',
-    paddingRight: 5,
   },
   colRight: {
     width: 85,
     alignItems: 'flex-end',
     justifyContent: 'center',
-    paddingRight: 15,
   },
-  colChange: {
-    width: 70,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  currencyCode: {
+  productName: {
     color: palette.currencyCode,
     fontSize: 14,
     fontWeight: '600',
-    marginBottom: 2,
   },
-  currencyName: {
-    color: palette.currencyName,
-    fontSize: 10,
-    marginTop: 1,
+  productCode: {
+    color: '#9ca3af',
+    fontSize: 11,
+    fontWeight: '500',
   },
   priceVal: {
-    color: palette.priceText,
+    color: '#16a34a',
     fontSize: 14,
+    fontWeight: '600',
   },
   priceValBold: {
-    color: palette.currencyCode,
-    fontSize: 15,
+    color: '#16a34a',
+    fontSize: 14,
     fontWeight: '700',
+  },
+  changeContainer: {
+    width: 170,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  percentText: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginRight: 6,
+    color: '#9ca3af', // Ürün kodu ile aynı gri ton
+  },
+  changeIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   itemPressed: {
     backgroundColor: '#f3f4f6',
-  },
-  percentChange: {
-    fontSize: 12,
-    fontWeight: '600',
   },
 });
 
