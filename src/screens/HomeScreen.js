@@ -19,16 +19,6 @@ const formatPrice = (value) => {
   }).format(value);
 };
 
-// Alış-Satış farkını yüzde olarak hesapla (spread)
-const calculateSpreadPercent = (alis, satis) => {
-  if (!alis || !satis || alis === 0) return { percent: '0.00', isPositive: true };
-  const spread = ((satis - alis) / alis) * 100;
-  return {
-    percent: Math.abs(spread).toFixed(2),
-    isPositive: spread >= 0
-  };
-};
-
 // Initial placeholder - Backend'den yüklenecek
 const INITIAL_DATA = [];
 
@@ -61,17 +51,16 @@ const HomeScreen = ({ navigation }) => {
   const displayData = useMemo(() => {
     if (!prices || prices.length === 0) return INITIAL_DATA;
 
-    // Alış-satış farkı (spread) yüzdesini hesapla - slider ile aynı mantık
+    // Backend'den gelen fiyat değişim yüzdesini kullan
     return prices.map(p => {
-      const spreadInfo = calculateSpreadPercent(p.calculatedAlis, p.calculatedSatis);
       return {
         code: p.code,
         name: p.name || p.code,
         buying: formatPrice(p.calculatedAlis),
         selling: formatPrice(p.calculatedSatis),
-        percent: `%${spreadInfo.percent}`,
-        isPositive: spreadInfo.isPositive,
-        hasChange: true,
+        percent: `%${p.changePercent || '0.00'}`,
+        isPositive: p.isPositive,
+        hasChange: p.hasChange || false,
         time: '14:15'
       };
     });
@@ -97,15 +86,14 @@ const HomeScreen = ({ navigation }) => {
         const p = prices.find(price => price.code === code);
         if (!p) return null;
 
-        const spreadInfo = calculateSpreadPercent(p.calculatedAlis, p.calculatedSatis);
         return {
           symbol: p.code,
           name: p.name || p.code,
           buying: formatPrice(p.calculatedAlis),
           selling: formatPrice(p.calculatedSatis),
           price: formatPrice(p.calculatedSatis),
-          percent: `%${spreadInfo.percent}`,
-          isPositive: spreadInfo.isPositive
+          percent: `%${p.changePercent || '0.00'}`,
+          isPositive: p.isPositive
         };
       })
       .filter(Boolean); // null değerleri filtrele

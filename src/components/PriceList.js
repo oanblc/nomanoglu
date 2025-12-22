@@ -37,11 +37,12 @@ const PriceItem = ({ item }) => {
 
   // isPositive prop'u varsa onu kullan, yoksa yüzdeden belirle
   const isPositive = item.isPositive !== undefined ? item.isPositive : numericPercent >= 0;
-  const hasChange = numericPercent !== 0;
+  const hasChange = item.hasChange !== undefined ? item.hasChange : numericPercent !== 0;
 
   // Renk belirleme - fiyatlar ve ok için
-  const priceColor = hasChange ? (isPositive ? '#16a34a' : '#dc2626') : '#9ca3af';
-  const arrowColor = priceColor;
+  // Fiyat değişimi yoksa (ilk yükleme) siyah göster, değişim varsa yeşil/kırmızı
+  const priceColor = hasChange ? (isPositive ? '#16a34a' : '#dc2626') : '#1A1A1A';
+  const arrowColor = hasChange ? priceColor : '#9ca3af';
 
   // Fiyat değişim animasyonu
   const flashAnim = useRef(new Animated.Value(0)).current;

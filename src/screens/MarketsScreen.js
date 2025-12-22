@@ -19,16 +19,6 @@ const formatPrice = (value) => {
   }).format(value);
 };
 
-// Alış-Satış farkını yüzde olarak hesapla (spread)
-const calculateSpreadPercent = (alis, satis) => {
-  if (!alis || !satis || alis === 0) return { percent: '0.00', isPositive: true };
-  const spread = ((satis - alis) / alis) * 100;
-  return {
-    percent: Math.abs(spread).toFixed(2),
-    isPositive: spread >= 0
-  };
-};
-
 // Initial placeholder - Backend'den yüklenecek
 const INITIAL_DATA = [];
 
@@ -37,20 +27,19 @@ const MarketsScreen = ({ navigation }) => {
   const { prices, isConnected } = useWebSocket();
   const sidebarRef = useRef(null);
 
-  // Backend'den gelen fiyatları formatla - alış-satış fark yüzdesini hesapla (spread)
+  // Backend'den gelen fiyatları formatla - fiyat değişim yüzdesini kullan
   const displayData = useMemo(() => {
     if (!prices || prices.length === 0) return INITIAL_DATA;
 
     return prices.map(p => {
-      const spreadInfo = calculateSpreadPercent(p.calculatedAlis, p.calculatedSatis);
       return {
         code: p.code,
         name: p.name || p.code,
         buying: formatPrice(p.calculatedAlis),
         selling: formatPrice(p.calculatedSatis),
-        percent: `%${spreadInfo.percent}`,
-        isPositive: spreadInfo.isPositive,
-        hasChange: true,
+        percent: `%${p.changePercent || '0.00'}`,
+        isPositive: p.isPositive,
+        hasChange: p.hasChange || false,
         time: '14:15'
       };
     });
