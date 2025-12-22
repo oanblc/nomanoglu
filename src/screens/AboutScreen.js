@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Image, Linking } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette, gradient } from '../../theme/colors';
 import { typography } from '../../theme/fonts';
@@ -44,7 +45,7 @@ const AboutScreen = ({ navigation }) => {
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
+            <Ionicons name="menu" size={28} color={palette.headerText} />
           </TouchableOpacity>
 
           <View style={styles.logoContainer}>
@@ -57,6 +58,7 @@ const AboutScreen = ({ navigation }) => {
 
           <View style={{ width: 32 }} />
         </View>
+
       </LinearGradient>
 
       <ScrollView
@@ -132,6 +134,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
   topBar: {
     flexDirection: 'row',

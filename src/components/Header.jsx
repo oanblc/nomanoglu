@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Animated, Dimensions, Linking, ScrollView, Platform, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette, gradient } from '../../theme/colors';
 import { typography } from '../../theme/fonts';
@@ -102,7 +105,7 @@ const Header = ({ topRates = [], navigation }) => {
         {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
+            <Ionicons name="menu" size={28} color={palette.headerText} />
           </TouchableOpacity>
           
           <View style={styles.logoContainer}>
@@ -117,7 +120,7 @@ const Header = ({ topRates = [], navigation }) => {
             style={styles.iconButton}
             onPress={() => navigation && navigation.navigate('Bildirimler')}
           >
-            <FontAwesome5 name="bell" size={24} color={palette.headerText} />
+            <Feather name="bell" size={26} color={palette.headerText} />
             {notificationCount > 0 && (
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>
@@ -127,6 +130,9 @@ const Header = ({ topRates = [], navigation }) => {
             )}
           </TouchableOpacity>
         </View>
+
+        {/* Logo altı çizgi */}
+        <View style={styles.headerDivider} />
 
         {/* Hero Rates - Scrollable */}
         <ScrollView 
@@ -195,7 +201,7 @@ const Header = ({ topRates = [], navigation }) => {
               {/* Header - Sarı Arka Plan */}
               <LinearGradient
                 colors={['#F7DE00', '#F7DE00']}
-                style={[styles.drawerHeader, { paddingTop: insets.top + 12 }]}
+                style={[styles.drawerHeader, { paddingTop: insets.top }]}
               >
                 <View style={styles.drawerHeaderRow}>
                   <Image
@@ -204,7 +210,7 @@ const Header = ({ topRates = [], navigation }) => {
                     resizeMode="contain"
                   />
                   <TouchableOpacity onPress={closeDrawer} style={styles.closeBtnSmall}>
-                    <FontAwesome5 name="times" size={14} color="#1A1A1A" />
+                    <AntDesign name="close" size={14} color="#1A1A1A" />
                   </TouchableOpacity>
                 </View>
               </LinearGradient>
@@ -359,9 +365,11 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
   },
+  headerDivider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
   heroRatesScroll: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
   },
   heroRatesContent: {
     paddingVertical: 10,
@@ -596,7 +604,8 @@ const styles = StyleSheet.create({
   // Compact Sidebar Styles
   drawerHeader: {
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingVertical: 12,
+    justifyContent: 'center',
   },
   drawerHeaderRow: {
     flexDirection: 'row',
@@ -604,8 +613,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   drawerLogoImg: {
-    width: 125,
-    height: 45,
+    width: 160,
+    height: 58,
   },
   closeBtnSmall: {
     width: 28,

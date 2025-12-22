@@ -2,6 +2,7 @@ import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated, Dimensions, Linking, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -91,7 +92,7 @@ const Sidebar = forwardRef(({ navigation }, ref) => {
             {/* Header - Sarı Arka Plan */}
             <LinearGradient
               colors={['#F7DE00', '#F7DE00']}
-              style={[styles.drawerHeader, { paddingTop: insets.top + 12 }]}
+              style={[styles.drawerHeader, { paddingTop: insets.top }]}
             >
               <View style={styles.drawerHeaderRow}>
                 <Image
@@ -100,7 +101,7 @@ const Sidebar = forwardRef(({ navigation }, ref) => {
                   resizeMode="contain"
                 />
                 <TouchableOpacity onPress={closeDrawer} style={styles.closeBtnSmall}>
-                  <FontAwesome5 name="times" size={14} color="#1A1A1A" />
+                  <AntDesign name="close" size={14} color="#1A1A1A" />
                 </TouchableOpacity>
               </View>
             </LinearGradient>
@@ -226,7 +227,8 @@ const styles = StyleSheet.create({
   },
   drawerHeader: {
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingVertical: 12,
+    justifyContent: 'center',
   },
   drawerHeaderRow: {
     flexDirection: 'row',
@@ -234,8 +236,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   drawerLogoImg: {
-    width: 125,
-    height: 45,
+    width: 160,
+    height: 58,
   },
   closeBtnSmall: {
     width: 28,

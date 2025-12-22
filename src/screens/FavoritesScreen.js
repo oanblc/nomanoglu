@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, StatusBar,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { palette, gradient } from '../../theme/colors';
 import { typography } from '../../theme/fonts';
@@ -164,7 +166,7 @@ const FavoritesScreen = ({ navigation }) => {
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
+            <Ionicons name="menu" size={28} color={palette.headerText} />
           </TouchableOpacity>
 
           <View style={styles.logoContainer}>
@@ -176,9 +178,10 @@ const FavoritesScreen = ({ navigation }) => {
           </View>
 
           <TouchableOpacity style={styles.iconButton} onPress={() => setAddModalVisible(true)}>
-            <FontAwesome5 name="plus" size={24} color={palette.headerText} />
+            <AntDesign name="plus" size={24} color={palette.headerText} />
           </TouchableOpacity>
         </View>
+
       </LinearGradient>
 
       {/* Favorites List */}
@@ -271,7 +274,9 @@ const styles = StyleSheet.create({
     backgroundColor: palette.screenBackground,
   },
   header: {
-    paddingBottom: 15,
+    paddingBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
   topBar: {
     flexDirection: 'row',

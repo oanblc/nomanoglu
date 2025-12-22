@@ -3,6 +3,7 @@ import { View, StyleSheet, StatusBar, TouchableOpacity, Image, Text, Linking } f
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import PriceList from '../components/PriceList';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { palette, gradient } from '../../theme/colors';
@@ -88,7 +89,7 @@ const MarketsScreen = ({ navigation }) => {
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
+            <Ionicons name="menu" size={28} color={palette.headerText} />
           </TouchableOpacity>
 
           <View style={styles.logoContainer}>
@@ -101,6 +102,7 @@ const MarketsScreen = ({ navigation }) => {
 
           <View style={{ width: 32 }} />
         </View>
+
       </LinearGradient>
 
       {/* Price List - No Header/Slider */}
@@ -143,7 +145,9 @@ const styles = StyleSheet.create({
     backgroundColor: palette.screenBackground,
   },
   header: {
-    paddingBottom: 15,
+    paddingBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
   topBar: {
     flexDirection: 'row',

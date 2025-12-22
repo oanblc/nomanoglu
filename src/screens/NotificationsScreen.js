@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, StatusBar, Image, L
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { palette, gradient } from '../../theme/colors';
 import { typography } from '../../theme/fonts';
@@ -198,7 +199,7 @@ const NotificationsScreen = ({ navigation }) => {
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={openDrawer}>
-            <FontAwesome5 name="bars" size={24} color={palette.headerText} />
+            <Ionicons name="menu" size={28} color={palette.headerText} />
           </TouchableOpacity>
 
           <View style={styles.logoContainer}>
@@ -217,6 +218,7 @@ const NotificationsScreen = ({ navigation }) => {
             <View style={{ width: 32 }} />
           )}
         </View>
+
       </LinearGradient>
 
       {/* Title Bar */}
@@ -276,7 +278,9 @@ const styles = StyleSheet.create({
     backgroundColor: palette.screenBackground,
   },
   header: {
-    paddingBottom: 15,
+    paddingBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
   topBar: {
     flexDirection: 'row',
