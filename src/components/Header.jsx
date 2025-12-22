@@ -13,6 +13,26 @@ import { getUnreadNotificationCount } from '../services/NotificationService';
 const { width } = Dimensions.get('window');
 const DRAWER_WIDTH = width * 0.75;
 
+// Satış/Alış fiyat farkı yüzdesini hesapla
+const calculateSpreadPercent = (buying, selling) => {
+  // String fiyatları sayıya çevir (Türkçe format: 1.234,56)
+  const parseTurkishNumber = (str) => {
+    if (!str) return 0;
+    return parseFloat(str.toString().replace(/\./g, '').replace(',', '.'));
+  };
+
+  const buyPrice = parseTurkishNumber(buying);
+  const sellPrice = parseTurkishNumber(selling);
+
+  if (!buyPrice || buyPrice === 0) return { percent: '0,00', isPositive: true };
+
+  const diff = ((sellPrice - buyPrice) / buyPrice) * 100;
+  return {
+    percent: Math.abs(diff).toFixed(2).replace('.', ','),
+    isPositive: diff >= 0
+  };
+};
+
 const Header = ({ topRates = [], navigation }) => {
   const insets = useSafeAreaInsets();
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -135,51 +155,58 @@ const Header = ({ topRates = [], navigation }) => {
         <View style={styles.headerDivider} />
 
         {/* Hero Rates - Scrollable */}
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.heroRatesScroll}
           contentContainerStyle={styles.heroRatesContent}
         >
-          {topRates.slice(0, 3).map((rate, index) => (
-            <View
-              key={index}
-              style={styles.heroCard}
-            >
-              <Text style={[styles.heroSymbol, typography.heroSymbol]}>{rate.symbol}</Text>
+          {topRates.slice(0, 3).map((rate, index) => {
+            // Spread hesapla
+            const spreadInfo = calculateSpreadPercent(rate.buying, rate.selling);
+            const spreadPercent = `%${spreadInfo.percent}`;
+            const spreadColor = spreadInfo.isPositive ? '#16a34a' : '#dc2626';
 
-              <View style={styles.heroPricesRow}>
-                <View style={styles.heroPriceCol}>
-                  <Text style={styles.heroPriceLabel}>Alış</Text>
-                  <Text style={styles.heroPriceText} numberOfLines={1}>
-                    {rate.buying || rate.price}
-                  </Text>
+            return (
+              <View
+                key={index}
+                style={styles.heroCard}
+              >
+                <Text style={[styles.heroSymbol, typography.heroSymbol]}>{rate.symbol}</Text>
+
+                <View style={styles.heroPricesRow}>
+                  <View style={styles.heroPriceCol}>
+                    <Text style={styles.heroPriceLabel}>Alış</Text>
+                    <Text style={styles.heroPriceText} numberOfLines={1}>
+                      {rate.buying || rate.price}
+                    </Text>
+                  </View>
+                  <View style={styles.heroPriceCol}>
+                    <Text style={styles.heroPriceLabel}>Satış</Text>
+                    <Text style={styles.heroPriceText} numberOfLines={1}>
+                      {rate.selling || rate.price}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.heroPriceCol}>
-                  <Text style={styles.heroPriceLabel}>Satış</Text>
-                  <Text style={styles.heroPriceText} numberOfLines={1}>
-                    {rate.selling || rate.price}
-                  </Text>
+
+                {/* Alış altında yüzde, Satış altında üçgen */}
+                <View style={styles.heroFooterRow}>
+                  <View style={styles.heroPriceCol}>
+                    <Text style={[styles.percentText, { color: spreadColor }]}>
+                      {spreadPercent}
+                    </Text>
+                  </View>
+                  <View style={[styles.heroPriceCol, styles.heroFooterRightCol]}>
+                    <FontAwesome5
+                      name={spreadInfo.isPositive ? 'caret-up' : 'caret-down'}
+                      size={18}
+                      color={spreadColor}
+                    />
+                  </View>
                 </View>
               </View>
-
-              {/* Alış altında yüzde, Satış altında üçgen */}
-              <View style={styles.heroFooterRow}>
-                <View style={styles.heroPriceCol}>
-                  <Text style={styles.percentText}>
-                    {rate.percent}
-                  </Text>
-                </View>
-                <View style={[styles.heroPriceCol, styles.heroFooterRightCol]}>
-                  <FontAwesome5
-                    name={rate.isPositive !== false ? 'caret-up' : 'caret-down'}
-                    size={18}
-                    color={rate.isPositive !== false ? '#16a34a' : '#dc2626'}
-                  />
-                </View>
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </ScrollView>
       </LinearGradient>
 

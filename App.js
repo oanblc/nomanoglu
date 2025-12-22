@@ -3,10 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
-import { Alert } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppNavigator from './src/navigation/AppNavigator';
 import SplashScreen from './src/components/SplashScreen';
-import { requestNotificationPermission } from './src/services/NotificationService';
+import OnboardingScreen from './src/screens/OnboardingScreen';
+
+const ONBOARDING_KEY = '@onboarding_complete';
 
 // NOMANOĞLU Teması (HAREM-Inspired: Mor-Lacivert Gradient)
 const theme = {
@@ -33,40 +36,58 @@ const theme = {
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [appReady, setAppReady] = useState(false);
 
+  // Onboarding durumunu kontrol et
   useEffect(() => {
-    // Uygulama başlatma işlemleri
-    const initializeApp = async () => {
-      // Splash ekranı bittikten sonra bildirim izni iste
-      if (!showSplash && !appReady) {
-        const hasPermission = await requestNotificationPermission();
-        
-        if (!hasPermission) {
-          Alert.alert(
-            'Bildirimler',
-            'Fiyat alarmlarından haberdar olmak için bildirim izni vermeniz önerilir. Ayarlar > Uygulamalar > NOMANOĞLU ALTIN > Bildirimler menüsünden izin verebilirsiniz.',
-            [{ text: 'Tamam' }]
-          );
-        }
-        
-        setAppReady(true);
+    const checkOnboarding = async () => {
+      try {
+        const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_KEY);
+        setShowOnboarding(onboardingComplete !== 'true');
+      } catch (error) {
+        console.log('Onboarding kontrol hatası:', error);
+        setShowOnboarding(false);
+      } finally {
+        setCheckingOnboarding(false);
       }
     };
 
-    initializeApp();
-  }, [showSplash]);
+    checkOnboarding();
+  }, []);
 
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  useEffect(() => {
+    // Uygulama başlatma işlemleri
+    if (!showSplash && !showOnboarding && !appReady) {
+      setAppReady(true);
+    }
+  }, [showSplash, showOnboarding]);
+
+  if (showSplash || checkingOnboarding) {
+    return (
+      <SafeAreaProvider>
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      </SafeAreaProvider>
+    );
+  }
+
+  if (showOnboarding) {
+    return (
+      <SafeAreaProvider>
+        <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
+      </SafeAreaProvider>
+    );
   }
 
   return (
-    <PaperProvider theme={theme}>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-      <StatusBar style="dark" />
-    </PaperProvider>
+    <SafeAreaProvider>
+      <PaperProvider theme={theme}>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+        <StatusBar style="dark" />
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, SectionList, Pressable, Animated } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,28 +30,66 @@ const getPercentColor = (percent) => {
   return numeric > 0 ? '#16a34a' : '#dc2626'; // yeşil / kırmızı
 };
 
+// Satış/Alış fiyat farkı yüzdesini hesapla
+const calculateSpreadPercent = (buying, selling) => {
+  // String fiyatları sayıya çevir (Türkçe format: 1.234,56)
+  const parseTurkishNumber = (str) => {
+    if (!str) return 0;
+    return parseFloat(str.toString().replace(/\./g, '').replace(',', '.'));
+  };
+
+  const buyPrice = parseTurkishNumber(buying);
+  const sellPrice = parseTurkishNumber(selling);
+
+  if (!buyPrice || buyPrice === 0) return { percent: '0,00', isPositive: true };
+
+  const diff = ((sellPrice - buyPrice) / buyPrice) * 100;
+  return {
+    percent: Math.abs(diff).toFixed(2).replace('.', ','),
+    isPositive: diff >= 0
+  };
+};
+
+// Türkçe format fiyatı sayıya çevir
+const parseTurkishNumber = (str) => {
+  if (!str) return 0;
+  return parseFloat(str.toString().replace(/\./g, '').replace(',', '.'));
+};
+
 const PriceItem = ({ item }) => {
-  // isPositive prop varsa onu kullan, yoksa yüzdeden hesapla
-  const percent = item.percent || '%0,00';
-  const numericPercent = parseFloat(percent.replace('%', '').replace(',', '.'));
+  // Satış/Alış farkı yüzdesini hesapla (spread için)
+  const spreadInfo = calculateSpreadPercent(item.buying, item.selling);
+  const percent = `%${spreadInfo.percent}`;
 
-  // isPositive prop'u varsa onu kullan, yoksa yüzdeden belirle
-  const isPositive = item.isPositive !== undefined ? item.isPositive : numericPercent >= 0;
-  const hasChange = item.hasChange !== undefined ? item.hasChange : numericPercent !== 0;
-
-  // Renk belirleme - fiyatlar ve ok için
-  // Fiyat değişimi yoksa (ilk yükleme) siyah göster, değişim varsa yeşil/kırmızı
-  const priceColor = hasChange ? (isPositive ? '#16a34a' : '#dc2626') : '#1A1A1A';
-  const arrowColor = hasChange ? priceColor : '#9ca3af';
-
-  // Fiyat değişim animasyonu
+  // Fiyat değişim animasyonu ve renk takibi
   const flashAnim = useRef(new Animated.Value(0)).current;
   const prevBuying = useRef(item.buying);
   const prevSelling = useRef(item.selling);
+  const [buyingDirection, setBuyingDirection] = useState(null); // 'up', 'down', null
+  const [sellingDirection, setSellingDirection] = useState(null);
 
   useEffect(() => {
+    const currentBuying = parseTurkishNumber(item.buying);
+    const currentSelling = parseTurkishNumber(item.selling);
+    const oldBuying = parseTurkishNumber(prevBuying.current);
+    const oldSelling = parseTurkishNumber(prevSelling.current);
+
     // Fiyat değişti mi kontrol et
     if (prevBuying.current !== item.buying || prevSelling.current !== item.selling) {
+      // Alış yönü
+      if (currentBuying > oldBuying) {
+        setBuyingDirection('up');
+      } else if (currentBuying < oldBuying) {
+        setBuyingDirection('down');
+      }
+
+      // Satış yönü
+      if (currentSelling > oldSelling) {
+        setSellingDirection('up');
+      } else if (currentSelling < oldSelling) {
+        setSellingDirection('down');
+      }
+
       // Sarı flash animasyonu
       flashAnim.setValue(1);
       Animated.timing(flashAnim, {
@@ -65,6 +103,30 @@ const PriceItem = ({ item }) => {
       prevSelling.current = item.selling;
     }
   }, [item.buying, item.selling]);
+
+  // Renk belirleme - her fiyat kendi değişimine göre
+  const getBuyingColor = () => {
+    if (buyingDirection === 'up') return '#16a34a'; // yeşil
+    if (buyingDirection === 'down') return '#dc2626'; // kırmızı
+    return '#1A1A1A'; // siyah (değişim yok)
+  };
+
+  const getSellingColor = () => {
+    if (sellingDirection === 'up') return '#16a34a';
+    if (sellingDirection === 'down') return '#dc2626';
+    return '#1A1A1A';
+  };
+
+  // Ok ve yüzde rengi - satış fiyatının yönüne göre
+  const getSpreadColor = () => {
+    if (sellingDirection === 'up') return '#16a34a';
+    if (sellingDirection === 'down') return '#dc2626';
+    return '#9ca3af'; // gri (değişim yok)
+  };
+
+  const buyingColor = getBuyingColor();
+  const sellingColor = getSellingColor();
+  const spreadColor = getSpreadColor();
 
   // Animasyonlu arka plan rengi
   const backgroundColor = flashAnim.interpolate({
@@ -87,10 +149,10 @@ const PriceItem = ({ item }) => {
             <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
           </View>
           <View style={styles.colMid}>
-            <Text style={[styles.priceVal, { color: priceColor }]}>{item.buying}</Text>
+            <Text style={[styles.priceVal, { color: buyingColor }]}>{item.buying}</Text>
           </View>
           <View style={styles.colRight}>
-            <Text style={[styles.priceValBold, { color: priceColor }]}>{item.selling}</Text>
+            <Text style={[styles.priceValBold, { color: sellingColor }]}>{item.selling}</Text>
           </View>
         </View>
 
@@ -100,13 +162,13 @@ const PriceItem = ({ item }) => {
             <Text style={styles.productCode}>{item.code}</Text>
           </View>
           <View style={styles.changeContainer}>
-            <Text style={styles.percentText}>
+            <Text style={[styles.percentText, { color: spreadColor }]}>
               {percent}
             </Text>
             <FontAwesome5
-              name={hasChange ? (isPositive ? 'caret-up' : 'caret-down') : 'minus'}
-              size={hasChange ? 18 : 12}
-              color={arrowColor}
+              name={sellingDirection === 'up' ? 'caret-up' : (sellingDirection === 'down' ? 'caret-down' : 'minus')}
+              size={sellingDirection ? 18 : 12}
+              color={spreadColor}
             />
           </View>
         </View>
