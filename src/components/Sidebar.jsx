@@ -178,10 +178,6 @@ const Sidebar = forwardRef(({ navigation }, ref) => {
               </View>
             </View>
 
-            {/* Footer */}
-            <View style={[styles.drawerFooterCompact, { paddingBottom: insets.bottom + 8 }]}>
-              <Text style={styles.footerText}>v1.0.0 • © 2024 Nomanoğlu</Text>
-            </View>
           </View>
         </Animated.View>
 
@@ -251,10 +247,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 12,
     paddingTop: 12,
-    justifyContent: 'space-between',
   },
   menuList: {
-    flex: 1,
   },
   menuItem: {
     flexDirection: 'row',

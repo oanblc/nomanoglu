@@ -156,11 +156,9 @@ const PriceItem = ({ item }) => {
           </View>
         </View>
 
-        {/* Alt satır: Kod | Yüzde ve Değişim üçgeni */}
+        {/* Alt satır: Yüzde ve Değişim üçgeni */}
         <View style={styles.bottomRow}>
-          <View style={styles.colLeft}>
-            <Text style={styles.productCode}>{item.code}</Text>
-          </View>
+          <View style={styles.colLeft} />
           <View style={styles.changeContainer}>
             <Text style={[styles.percentText, { color: spreadColor }]}>
               {percent}
@@ -265,11 +263,6 @@ const styles = StyleSheet.create({
     color: palette.currencyCode,
     fontSize: 14,
     fontWeight: '600',
-  },
-  productCode: {
-    color: '#9ca3af',
-    fontSize: 11,
-    fontWeight: '500',
   },
   priceVal: {
     color: '#16a34a',

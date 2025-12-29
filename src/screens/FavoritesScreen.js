@@ -22,6 +22,75 @@ const formatPrice = (value) => {
   }).format(value);
 };
 
+// Türkçe format fiyatı sayıya çevir
+const parseTurkishNumber = (str) => {
+  if (!str) return 0;
+  return parseFloat(str.toString().replace(/\./g, '').replace(',', '.'));
+};
+
+// Favori item component - fiyat değişim takibi için
+const FavoriteItem = ({ item, onRemove }) => {
+  const prevBuying = useRef(item.buying);
+  const prevSelling = useRef(item.selling);
+  const [buyingColor, setBuyingColor] = useState('#1A1A1A');
+  const [sellingColor, setSellingColor] = useState('#1A1A1A');
+
+  useEffect(() => {
+    const currentBuying = parseTurkishNumber(item.buying);
+    const currentSelling = parseTurkishNumber(item.selling);
+    const oldBuying = parseTurkishNumber(prevBuying.current);
+    const oldSelling = parseTurkishNumber(prevSelling.current);
+
+    // Alış değişimi
+    if (currentBuying > oldBuying) {
+      setBuyingColor('#16a34a'); // yeşil
+    } else if (currentBuying < oldBuying) {
+      setBuyingColor('#dc2626'); // kırmızı
+    }
+
+    // Satış değişimi
+    if (currentSelling > oldSelling) {
+      setSellingColor('#16a34a'); // yeşil
+    } else if (currentSelling < oldSelling) {
+      setSellingColor('#dc2626'); // kırmızı
+    }
+
+    prevBuying.current = item.buying;
+    prevSelling.current = item.selling;
+  }, [item.buying, item.selling]);
+
+  return (
+    <View style={styles.favoriteCard}>
+      <View style={styles.favoriteCardContent}>
+        <View style={styles.favoriteInfo}>
+          <Text style={styles.favoriteCode}>{item.name}</Text>
+        </View>
+
+        {/* Sağ - Fiyatlar */}
+        <View style={styles.favoritePrices}>
+          <View style={styles.priceItem}>
+            <Text style={styles.priceLabel}>ALIŞ</Text>
+            <Text style={[styles.priceValue, { color: buyingColor }]}>{item.buying}</Text>
+          </View>
+          <View style={styles.priceSeparator} />
+          <View style={styles.priceItem}>
+            <Text style={styles.priceLabel}>SATIŞ</Text>
+            <Text style={[styles.priceValue, { color: sellingColor }]}>{item.selling}</Text>
+          </View>
+        </View>
+
+        {/* Sil Butonu */}
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={() => onRemove(item.code)}
+        >
+          <FontAwesome5 name="times" size={14} color="#999" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
 const FavoritesScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const sidebarRef = useRef(null);
@@ -112,37 +181,7 @@ const FavoritesScreen = ({ navigation }) => {
   };
 
   const renderFavoriteItem = ({ item }) => {
-    return (
-      <View style={styles.favoriteCard}>
-        <View style={styles.favoriteCardContent}>
-          <View style={styles.favoriteInfo}>
-            <Text style={styles.favoriteCode}>{item.code}</Text>
-            <Text style={styles.favoriteName}>{item.name}</Text>
-          </View>
-
-          {/* Sağ - Fiyatlar */}
-          <View style={styles.favoritePrices}>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>ALIŞ</Text>
-              <Text style={styles.priceValue}>{item.buying}</Text>
-            </View>
-            <View style={styles.priceSeparator} />
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>SATIŞ</Text>
-              <Text style={[styles.priceValue, styles.sellPrice]}>{item.selling}</Text>
-            </View>
-          </View>
-
-          {/* Sil Butonu */}
-          <TouchableOpacity
-            style={styles.deleteBtn}
-            onPress={() => removeFavorite(item.code)}
-          >
-            <FontAwesome5 name="times" size={14} color="#999" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+    return <FavoriteItem item={item} onRemove={removeFavorite} />;
   };
 
   const renderEmpty = () => (
@@ -329,11 +368,6 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     letterSpacing: 0.3,
   },
-  favoriteName: {
-    fontSize: 11,
-    color: '#888',
-    marginTop: 2,
-  },
   favoritePrices: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -353,9 +387,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#1A1A1A',
-  },
-  sellPrice: {
-    color: '#F7DE00',
   },
   priceSeparator: {
     width: 1,

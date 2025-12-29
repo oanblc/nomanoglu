@@ -73,8 +73,8 @@ const HomeScreen = ({ navigation }) => {
     // Hangi kodları göstereceğimizi belirle
     let codesToShow;
     if (favorites.length > 0) {
-      // Favoriler varsa ilk 3 favoriyi göster
-      codesToShow = favorites.slice(0, 3).map(f => f.code);
+      // Favoriler varsa tüm favorileri göster
+      codesToShow = favorites.map(f => f.code);
     } else {
       // Favori yoksa varsayılan ürünleri göster (Has, Çeyrek, Yarım)
       codesToShow = DEFAULT_SLIDER_CODES;

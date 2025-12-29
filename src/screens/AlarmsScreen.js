@@ -203,118 +203,47 @@ const AlarmsScreen = ({ navigation }) => {
             const isAbove = item.condition === '>';
             const isTriggered = item.triggered === true;
 
-            // Tetiklenme tarihini formatla
-            const formatTriggeredDate = (dateStr) => {
-              if (!dateStr) return '';
-              const date = new Date(dateStr);
-              return date.toLocaleDateString('tr-TR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-            };
-
             return (
-              <View style={[
-                styles.alarmCard,
-                isTriggered && styles.alarmCardTriggered
-              ]}>
-                {/* Tetiklendi banner */}
-                {isTriggered && (
-                  <View style={styles.triggeredBanner}>
-                    <FontAwesome5 name="check-circle" size={14} color="#FFFFFF" />
-                    <Text style={styles.triggeredBannerText}>Tetiklendi</Text>
-                    <Text style={styles.triggeredBannerDate}>
-                      {formatTriggeredDate(item.triggeredAt)}
-                    </Text>
+              <View style={styles.alarmCard}>
+                <View style={styles.alarmCardContent}>
+                  {/* Sol - Ürün İsmi ve Koşul */}
+                  <View style={styles.alarmInfo}>
+                    <Text style={styles.alarmName}>{item.name}</Text>
+                    <View style={styles.alarmCondition}>
+                      <Text style={styles.alarmPriceType}>{item.priceType}</Text>
+                      <FontAwesome5
+                        name={isAbove ? 'arrow-up' : 'arrow-down'}
+                        size={10}
+                        color={isAbove ? '#16a34a' : '#dc2626'}
+                      />
+                      <Text style={[
+                        styles.alarmConditionText,
+                        { color: isAbove ? '#16a34a' : '#dc2626' }
+                      ]}>
+                        {isAbove ? 'üstüne çıkarsa' : 'altına düşerse'}
+                      </Text>
+                    </View>
                   </View>
-                )}
 
-                <View style={styles.alarmCardHeader}>
-                  <View style={styles.alarmHeaderText}>
-                    <Text style={[
-                      styles.alarmCode,
-                      isTriggered && styles.alarmCodeTriggered
-                    ]}>{item.code}</Text>
-                    <Text style={[
-                      styles.alarmName,
-                      isTriggered && styles.alarmNameTriggered
-                    ]}>{item.name}</Text>
+                  {/* Orta - Fiyatlar */}
+                  <View style={styles.alarmPrices}>
+                    <View style={styles.alarmPriceItem}>
+                      <Text style={styles.alarmPriceLabel}>GÜNCEL</Text>
+                      <Text style={styles.alarmPriceValue}>{currentPrice}</Text>
+                    </View>
+                    <View style={styles.alarmPriceSeparator} />
+                    <View style={styles.alarmPriceItem}>
+                      <Text style={styles.alarmPriceLabel}>HEDEF</Text>
+                      <Text style={styles.alarmPriceValue}>{item.targetPrice}</Text>
+                    </View>
                   </View>
-                  <View style={[
-                    styles.alarmBadge,
-                    isTriggered && styles.alarmBadgeTriggered
-                  ]}>
-                    <FontAwesome5
-                      name={isAbove ? 'arrow-up' : 'arrow-down'}
-                      size={10}
-                      color={isTriggered ? '#9CA3AF' : (isAbove ? '#22C55E' : '#EF4444')}
-                    />
-                    <Text style={[
-                      styles.alarmBadgeText,
-                      { color: isTriggered ? '#9CA3AF' : (isAbove ? '#22C55E' : '#EF4444') }
-                    ]}>
-                      {isAbove ? 'Üstüne Çıktı' : 'Altına Düştü'}
-                    </Text>
-                  </View>
-                </View>
 
-                <View style={[
-                  styles.alarmPriceContainer,
-                  isTriggered && styles.alarmPriceContainerTriggered
-                ]}>
-                  <View style={styles.alarmPriceBox}>
-                    <Text style={styles.alarmPriceBoxLabel}>
-                      {isTriggered ? 'TETİKLENDİĞİ FİYAT' : 'GÜNCEL FİYAT'}
-                    </Text>
-                    <Text style={[
-                      styles.alarmPriceBoxValue,
-                      isTriggered && styles.alarmPriceBoxValueTriggered
-                    ]}>{currentPrice}</Text>
-                    <Text style={styles.alarmPriceBoxSub}>{item.priceType}</Text>
-                  </View>
-                  <View style={[
-                    styles.alarmPriceDivider,
-                    isTriggered && styles.alarmPriceDividerTriggered
-                  ]}>
-                    <FontAwesome5
-                      name={isTriggered ? "check" : "exchange-alt"}
-                      size={14}
-                      color={isTriggered ? "#22C55E" : "#F7DE00"}
-                    />
-                  </View>
-                  <View style={styles.alarmPriceBox}>
-                    <Text style={styles.alarmPriceBoxLabel}>HEDEF FİYAT</Text>
-                    <Text style={[
-                      styles.alarmPriceBoxValue,
-                      isTriggered ? styles.alarmPriceBoxValueTriggered : styles.alarmTargetValue
-                    ]}>{item.targetPrice}</Text>
-                    <Text style={styles.alarmPriceBoxSub}>{item.priceType}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.alarmCardFooter}>
-                  <View style={styles.alarmStatusContainer}>
-                    {isTriggered ? (
-                      <>
-                        <View style={styles.alarmStatusDotTriggered} />
-                        <Text style={styles.alarmStatusTextTriggered}>Tamamlandı</Text>
-                      </>
-                    ) : (
-                      <>
-                        <View style={styles.alarmStatusDot} />
-                        <Text style={styles.alarmStatusText}>Aktif</Text>
-                      </>
-                    )}
-                  </View>
+                  {/* Sağ - Sil Butonu */}
                   <TouchableOpacity
-                    style={styles.alarmDeleteButton}
+                    style={styles.alarmDeleteBtn}
                     onPress={() => deleteAlarm(item.id)}
                   >
-                    <FontAwesome5 name="trash-alt" size={14} color="#EF4444" />
-                    <Text style={styles.alarmDeleteText}>Sil</Text>
+                    <FontAwesome5 name="times" size={14} color="#999" />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -657,181 +586,81 @@ const styles = StyleSheet.create({
   },
   alarmCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    marginBottom: 16,
+    borderRadius: 12,
+    marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(247, 222, 0, 0.15)',
+    borderColor: 'rgba(247, 222, 0, 0.12)',
   },
-  alarmCardHeader: {
+  alarmCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F5F5F5',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
   },
-  alarmHeaderText: {
+  alarmInfo: {
     flex: 1,
-  },
-  alarmCode: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    letterSpacing: 0.5,
+    marginRight: 12,
   },
   alarmName: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 2,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    letterSpacing: 0.3,
   },
-  alarmBadge: {
+  alarmCondition: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
+    marginTop: 4,
     gap: 4,
   },
-  alarmBadgeText: {
+  alarmPriceType: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#888',
+  },
+  alarmConditionText: {
     fontSize: 11,
     fontWeight: '600',
   },
-  alarmPriceContainer: {
+  alarmPrices: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#FAFAFA',
   },
-  alarmPriceBox: {
-    flex: 1,
+  alarmPriceItem: {
     alignItems: 'center',
+    minWidth: 50,
   },
-  alarmPriceBoxLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#999',
-    letterSpacing: 1,
-    marginBottom: 6,
+  alarmPriceLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: '#888',
+    marginBottom: 4,
+    letterSpacing: 0.5,
   },
-  alarmPriceBoxValue: {
-    fontSize: 20,
+  alarmPriceValue: {
+    fontSize: 13,
     fontWeight: '700',
     color: '#1A1A1A',
   },
-  alarmTargetValue: {
-    color: '#F7DE00',
+  alarmPriceSeparator: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E8E8E8',
+    marginHorizontal: 10,
   },
-  alarmPriceBoxSub: {
-    fontSize: 11,
-    color: '#888',
-    marginTop: 4,
-  },
-  alarmPriceDivider: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFF9E6',
+  alarmDeleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#F5F5F5',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  alarmCardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 14,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#F5F5F5',
-  },
-  alarmStatusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  alarmStatusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#22C55E',
-  },
-  alarmStatusText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#22C55E',
-  },
-  alarmDeleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF2F2',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  alarmDeleteText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#EF4444',
-  },
-  // Tetiklenen alarm stilleri
-  alarmCardTriggered: {
-    backgroundColor: '#F8FAF8',
-    borderColor: 'rgba(34, 197, 94, 0.2)',
-    opacity: 0.9,
-  },
-  triggeredBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#22C55E',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    gap: 8,
-  },
-  triggeredBannerText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    flex: 1,
-  },
-  triggeredBannerDate: {
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.85)',
-  },
-  alarmCodeTriggered: {
-    color: '#6B7280',
-  },
-  alarmNameTriggered: {
-    color: '#9CA3AF',
-  },
-  alarmBadgeTriggered: {
-    backgroundColor: '#F3F4F6',
-  },
-  alarmPriceContainerTriggered: {
-    backgroundColor: '#F3F4F6',
-  },
-  alarmPriceBoxValueTriggered: {
-    color: '#6B7280',
-  },
-  alarmPriceDividerTriggered: {
-    backgroundColor: '#E8F5E9',
-  },
-  alarmStatusDotTriggered: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#9CA3AF',
-  },
-  alarmStatusTextTriggered: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#9CA3AF',
+    marginLeft: 12,
   },
   createModalContainer: {
     flex: 1,
