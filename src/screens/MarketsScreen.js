@@ -40,7 +40,7 @@ const MarketsScreen = ({ navigation }) => {
         percent: `%${p.changePercent || '0.00'}`,
         isPositive: p.isPositive,
         hasChange: p.hasChange || false,
-        time: '14:15'
+        tarih: p.tarih
       };
     });
   }, [prices]);

@@ -146,7 +146,7 @@ const PriceItem = ({ item }) => {
         {/* Üst satır: Ürün adı | Alış | Satış */}
         <View style={styles.topRow}>
           <View style={styles.colLeft}>
-            <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
+            <Text style={styles.productName} numberOfLines={1}>{item.name?.toUpperCase()}</Text>
           </View>
           <View style={styles.colMid}>
             <Text style={[styles.priceVal, { color: buyingColor }]}>{item.buying}</Text>
@@ -156,9 +156,13 @@ const PriceItem = ({ item }) => {
           </View>
         </View>
 
-        {/* Alt satır: Yüzde ve Değişim üçgeni */}
+        {/* Alt satır: Son güncelleme saati | Yüzde ve Değişim üçgeni */}
         <View style={styles.bottomRow}>
-          <View style={styles.colLeft} />
+          <View style={styles.colLeft}>
+            <Text style={styles.updateTime}>
+              {item.tarih ? item.tarih.split(' ')[1]?.substring(0, 5) : ''}
+            </Text>
+          </View>
           <View style={styles.changeContainer}>
             <Text style={[styles.percentText, { color: spreadColor }]}>
               {percent}
@@ -261,8 +265,14 @@ const styles = StyleSheet.create({
   },
   productName: {
     color: palette.currencyCode,
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '400',
+    letterSpacing: 0.5,
+  },
+  updateTime: {
+    color: '#9ca3af',
+    fontSize: 10,
+    fontWeight: '400',
   },
   priceVal: {
     color: '#16a34a',

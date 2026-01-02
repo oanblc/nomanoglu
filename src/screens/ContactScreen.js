@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, StatusBar, Image, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome5, FontAwesome6 } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette, gradient } from '../../theme/colors';
@@ -142,7 +142,7 @@ const ContactScreen = ({ navigation }) => {
     socialButtons.push({ icon: 'facebook-f', url: settings.socialFacebook, color: '#1877F2' });
   }
   if (settings?.socialTwitter) {
-    socialButtons.push({ icon: 'twitter', url: settings.socialTwitter, color: '#1DA1F2' });
+    socialButtons.push({ icon: 'x-twitter', url: settings.socialTwitter, color: '#000000' });
   }
   if (settings?.socialYoutube) {
     socialButtons.push({ icon: 'youtube', url: settings.socialYoutube, color: '#FF0000' });
@@ -405,7 +405,7 @@ const ContactScreen = ({ navigation }) => {
                     style={styles.socialButton}
                     onPress={() => Linking.openURL(social.url)}
                   >
-                    <FontAwesome5 name={social.icon} size={24} color={palette.headerGradientStart} />
+                    <FontAwesome6 name={social.icon} size={24} color={social.color} />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -498,13 +498,13 @@ const styles = StyleSheet.create({
   titleLine: {
     flex: 1,
     height: 2,
-    backgroundColor: palette.headerGradientStart,
-    opacity: 0.3,
+    backgroundColor: '#333333',
+    opacity: 0.2,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: palette.headerGradientStart,
+    color: '#333333',
     marginHorizontal: 12,
     letterSpacing: 0.5,
   },
@@ -775,13 +775,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: palette.headerGradientStart,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    borderWidth: 2,
-    borderColor: palette.headerGradientStart,
   },
   // Bottom Tab Bar
   bottomTabBar: {

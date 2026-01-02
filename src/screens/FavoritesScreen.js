@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, StatusBar, FlatList, Image, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, StatusBar, FlatList, Image, Linking, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -96,6 +96,7 @@ const FavoritesScreen = ({ navigation }) => {
   const sidebarRef = useRef(null);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [favorites, setFavorites] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const { prices, isConnected } = useWebSocket();
 
   // Backend'den gelen fiyatları formatla
@@ -109,6 +110,17 @@ const FavoritesScreen = ({ navigation }) => {
       selling: formatPrice(p.calculatedSatis),
     }));
   }, [prices]);
+
+  // Arama ile filtrelenmiş ve favorilerde olmayan fiyatlar
+  const filteredPrices = useMemo(() => {
+    const notInFavorites = allPrices.filter(p => !favorites.find(f => f.code === p.code));
+    if (!searchQuery || !searchQuery.trim()) return notInFavorites;
+    const query = searchQuery.toLowerCase().trim();
+    return notInFavorites.filter(p =>
+      p.name?.toLowerCase().includes(query) ||
+      p.code?.toLowerCase().includes(query)
+    );
+  }, [allPrices, favorites, searchQuery]);
 
   useEffect(() => {
     loadFavorites();
@@ -272,31 +284,60 @@ const FavoritesScreen = ({ navigation }) => {
           <View style={[styles.addModalContent, { paddingBottom: insets.bottom > 0 ? insets.bottom : 20 }]}>
             <View style={styles.addModalHeader}>
               <Text style={styles.addModalTitle}>Favorilere Ekle</Text>
-              <TouchableOpacity onPress={() => setAddModalVisible(false)}>
+              <TouchableOpacity onPress={() => {
+                setAddModalVisible(false);
+                setSearchQuery('');
+              }}>
                 <FontAwesome5 name="times" size={24} color="#333" />
               </TouchableOpacity>
             </View>
 
+            {/* Arama Kutusu */}
+            <View style={styles.searchContainer}>
+              <FontAwesome5 name="search" size={14} color="#999" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Ürün ara..."
+                placeholderTextColor="#999"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClear}>
+                  <FontAwesome5 name="times" size={12} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
+
             <ScrollView style={styles.priceListScroll}>
-              {allPrices.filter(p => !favorites.find(f => f.code === p.code)).map((price, index) => (
+              {filteredPrices.map((price, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={styles.priceOption}
-                  onPress={() => addToFavorites(price)}
+                  style={styles.priceListItem}
+                  onPress={() => {
+                    addToFavorites(price);
+                    setSearchQuery('');
+                  }}
                 >
-                  <View>
-                    <Text style={styles.priceOptionCode}>{price.name}</Text>
-                    <Text style={styles.priceOptionName}>{price.code}</Text>
+                  <View style={styles.priceListInfo}>
+                    <Text style={styles.priceListName}>{price.name}</Text>
+                    <Text style={styles.priceListValues}>
+                      A: {price.buying} / S: {price.selling}
+                    </Text>
                   </View>
-                  <View style={styles.priceOptionRight}>
-                    <Text style={styles.priceOptionValue}>{price.selling}</Text>
-                    <FontAwesome5 name="plus-circle" size={20} color={palette.headerGradientStart} />
-                  </View>
+                  <FontAwesome5 name="plus-circle" size={20} color={palette.headerGradientStart} />
                 </TouchableOpacity>
               ))}
               {allPrices.length === 0 && (
                 <View style={styles.loadingContainer}>
                   <Text style={styles.loadingText}>Fiyatlar yükleniyor...</Text>
+                </View>
+              )}
+              {filteredPrices.length === 0 && allPrices.length > 0 && (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>
+                    {searchQuery ? 'Sonuç bulunamadı' : 'Tüm ürünler favorilerde'}
+                  </Text>
                 </View>
               )}
             </ScrollView>
@@ -471,43 +512,61 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-  priceListScroll: {
-    padding: 10,
-  },
-  priceOption: {
+  searchContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginHorizontal: 20,
+    marginBottom: 12,
   },
-  priceOptionCode: {
-    fontSize: 16,
-    fontWeight: '600',
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 14,
     color: '#333',
   },
-  priceOptionName: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
+  searchClear: {
+    padding: 4,
   },
-  priceOptionRight: {
+  priceListScroll: {
+    paddingHorizontal: 10,
+  },
+  priceListItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
-  priceOptionValue: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: palette.headerGradientStart,
+  priceListInfo: {
+    flex: 1,
+  },
+  priceListName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+  priceListValues: {
+    fontSize: 11,
+    color: '#888',
   },
   loadingContainer: {
-    padding: 40,
+    padding: 20,
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#888',
   },
 });

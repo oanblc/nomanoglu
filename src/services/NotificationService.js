@@ -1,34 +1,52 @@
-import * as Notifications from 'expo-notifications';
 import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
 const NOTIFICATIONS_KEY = '@notifications';
 
-// Bildirim davranışını ayarla
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// Expo Go'da mı çalışıyoruz kontrol et
+const isExpoGo = Constants.appOwnership === 'expo';
+
+// Notifications modülünü sadece development build'de yükle
+let Notifications = null;
+if (!isExpoGo) {
+  try {
+    Notifications = require('expo-notifications');
+    // Bildirim davranışını ayarla
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  } catch (error) {
+    console.log('expo-notifications yüklenemedi (Expo Go)');
+  }
+}
 
 // Bildirim izni iste
 export const requestNotificationPermission = async () => {
+  // Expo Go'da notification izni çalışmaz
+  if (!Notifications) {
+    console.log('Expo Go: Bildirim izni atlanıyor');
+    return true; // Alert kullanacağız
+  }
+
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    
+
     if (existingStatus !== 'granted') {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    
+
     if (finalStatus !== 'granted') {
       console.log('Bildirim izni verilmedi');
       return false;
     }
-    
+
     return true;
   } catch (error) {
     console.error('Bildirim izni hatası:', error);
@@ -38,9 +56,15 @@ export const requestNotificationPermission = async () => {
 
 // Yerel bildirim gönder
 export const sendLocalNotification = async (title, body, data = {}) => {
+  // Expo Go'da push notification çalışmaz, sadece log'la
+  if (!Notifications) {
+    console.log('📱 Expo Go - Bildirim (Alert ile gösterilecek):', title, body);
+    return;
+  }
+
   try {
     const hasPermission = await requestNotificationPermission();
-    
+
     if (!hasPermission) {
       console.log('Bildirim izni yok');
       return;

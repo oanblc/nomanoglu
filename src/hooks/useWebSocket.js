@@ -5,6 +5,7 @@ import { API_URL, WS_URL } from '../config';
 import { checkAlarms } from '../services/NotificationService';
 
 const ALARMS_KEY = '@alarms';
+const PRICES_CACHE_KEY = '@cached_prices';
 
 // Demo data - Backend bağlantısı yoksa gösterilecek
 const demoData = [];
@@ -28,7 +29,37 @@ export const useWebSocket = () => {
   const [lastUpdate, setLastUpdate] = useState(null);
   const socketRef = useRef(null);
   const previousPricesRef = useRef({}); // Önceki fiyatları sakla
+  const pricesMapRef = useRef({}); // Tüm fiyatları map olarak sakla (kaybolmaması için)
   const alarmsRef = useRef([]); // Alarmları sakla
+
+  // Fiyatları AsyncStorage'a kaydet (uygulama kapansa bile korunsun)
+  const savePricesToCache = async (pricesMap) => {
+    try {
+      await AsyncStorage.setItem(PRICES_CACHE_KEY, JSON.stringify(pricesMap));
+    } catch (error) {
+      console.log('Fiyat cache kaydetme hatası:', error);
+    }
+  };
+
+  // AsyncStorage'dan fiyatları yükle
+  const loadPricesFromCache = async () => {
+    try {
+      const cached = await AsyncStorage.getItem(PRICES_CACHE_KEY);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      console.log('Fiyat cache yükleme hatası:', error);
+    }
+    return {};
+  };
+
+  // Map'i sıralı array'e çevir
+  const mapToSortedArray = (pricesMap) => {
+    return Object.values(pricesMap)
+      .filter(p => p.isCustom !== false && p.isVisible !== false)
+      .sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+  };
 
   // Alarmları yükle ve güncel tut
   const loadAlarms = async () => {
@@ -46,7 +77,7 @@ export const useWebSocket = () => {
     }
   };
 
-  // Tetiklenen alarmları işaretle (silmiyoruz, triggered: true yapıyoruz)
+  // Tetiklenen alarmları işaretle ve pasif yap
   const markAlarmsAsTriggered = async (triggeredIds) => {
     try {
       const stored = await AsyncStorage.getItem(ALARMS_KEY);
@@ -54,13 +85,13 @@ export const useWebSocket = () => {
         const alarms = JSON.parse(stored);
         const updated = alarms.map(a => {
           if (triggeredIds.includes(a.id)) {
-            return { ...a, triggered: true, triggeredAt: new Date().toISOString() };
+            return { ...a, triggered: true, isActive: false, triggeredAt: new Date().toISOString() };
           }
           return a;
         });
         await AsyncStorage.setItem(ALARMS_KEY, JSON.stringify(updated));
         alarmsRef.current = updated;
-        console.log('✅ Alarmlar tetiklendi olarak işaretlendi:', triggeredIds.length);
+        console.log('✅ Alarmlar tetiklendi ve pasif yapıldı:', triggeredIds.length);
       }
     } catch (error) {
       console.log('Alarm işaretleme hatası:', error);
@@ -75,8 +106,8 @@ export const useWebSocket = () => {
       return;
     }
 
-    // Sadece henüz tetiklenmemiş alarmları kontrol et
-    const activeAlarms = alarmsRef.current.filter(a => !a.triggered);
+    // Sadece aktif ve henüz tetiklenmemiş alarmları kontrol et
+    const activeAlarms = alarmsRef.current.filter(a => !a.triggered && a.isActive !== false);
     if (activeAlarms.length === 0) {
       console.log('⚠️ Aktif alarm yok');
       return;
@@ -95,37 +126,50 @@ export const useWebSocket = () => {
         // Önce alarmları yükle
         await loadAlarms();
 
-        console.log('📦 Cache\'den fiyatlar çekiliyor...');
+        // Önce local cache'den yükle (hızlı açılış için)
+        const localCache = await loadPricesFromCache();
+        if (Object.keys(localCache).length > 0) {
+          pricesMapRef.current = localCache;
+          const sortedPrices = mapToSortedArray(localCache);
+          if (sortedPrices.length > 0) {
+            console.log('📱 Local cache\'den', sortedPrices.length, 'fiyat yüklendi');
+            setPrices(sortedPrices);
+          }
+        }
+
+        // Sonra API'den güncel fiyatları çek
+        console.log('📦 API cache\'den fiyatlar çekiliyor...');
         const response = await fetch(`${API_URL}/api/prices/cached`);
         const result = await response.json();
 
         if (result.success && result.data?.prices?.length > 0) {
-          // Sadece isCustom ve isVisible olan ürünleri al, order'a göre sırala
-          // NOT: order ?? 999 kullanıyoruz çünkü order=0 geçerli bir değer (Has Altın)
-          const customPrices = result.data.prices
-            .filter(p => p.isCustom !== false && p.isVisible !== false)
-            .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
-            .map(p => {
-              // İlk yüklemede değişim yüzdesi %0.00 olacak
-              return {
+          // Gelen fiyatları mevcut map'e ekle/güncelle (merge)
+          result.data.prices.forEach(p => {
+            if (p.isCustom !== false && p.isVisible !== false) {
+              const existingPrice = pricesMapRef.current[p.code];
+              pricesMapRef.current[p.code] = {
                 ...p,
                 changePercent: '0.00',
                 isPositive: true,
                 hasChange: false
               };
-            });
-
-          // Önceki fiyatları sakla (satış fiyatı üzerinden)
-          customPrices.forEach(p => {
-            previousPricesRef.current[p.code] = p.calculatedSatis;
+              // Önceki fiyatı sakla
+              previousPricesRef.current[p.code] = p.calculatedSatis;
+            }
           });
 
-          console.log('✅ Cache\'den', customPrices.length, 'fiyat yüklendi');
-          setPrices(customPrices);
+          // Map'i sıralı array'e çevir
+          const sortedPrices = mapToSortedArray(pricesMapRef.current);
+
+          console.log('✅ API cache\'den', sortedPrices.length, 'fiyat yüklendi');
+          setPrices(sortedPrices);
           setLastUpdate(result.updatedAt);
 
+          // Local cache'e kaydet
+          await savePricesToCache(pricesMapRef.current);
+
           // Alarmları kontrol et
-          await checkAlarmsWithPrices(customPrices);
+          await checkAlarmsWithPrices(sortedPrices);
         }
       } catch (error) {
         console.error('❌ Cache fetch hatası:', error.message);
@@ -164,36 +208,38 @@ export const useWebSocket = () => {
           // Alarmları yeniden yükle (yeni alarm eklenmiş olabilir)
           await loadAlarms();
 
-          // Sadece isCustom ve isVisible olan ürünleri al, order'a göre sırala
-          // NOT: order ?? 999 kullanıyoruz çünkü order=0 geçerli bir değer (Has Altın)
-          const customPrices = data.prices
-            .filter(p => p.isCustom !== false && p.isVisible !== false)
-            .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
-            .map(p => {
+          // Gelen fiyatları mevcut map'e ekle/güncelle (MERGE - mevcut fiyatlar korunur)
+          data.prices.forEach(p => {
+            if (p.isCustom !== false && p.isVisible !== false) {
               // Önceki fiyatla karşılaştır ve değişim yüzdesini hesapla
               const prevPrice = previousPricesRef.current[p.code];
               const changeInfo = calculateChangePercent(p.calculatedSatis, prevPrice);
 
-              return {
+              pricesMapRef.current[p.code] = {
                 ...p,
                 changePercent: changeInfo.percent,
                 isPositive: changeInfo.isPositive,
                 hasChange: changeInfo.hasChange
               };
-            });
 
-          // Yeni fiyatları önceki fiyatlar olarak sakla
-          customPrices.forEach(p => {
-            previousPricesRef.current[p.code] = p.calculatedSatis;
+              // Yeni fiyatı önceki fiyat olarak sakla
+              previousPricesRef.current[p.code] = p.calculatedSatis;
+            }
           });
 
-          if (customPrices.length > 0) {
-            console.log('✅ WebSocket\'ten', customPrices.length, 'custom fiyat alındı');
-            setPrices(customPrices);
+          // Map'i sıralı array'e çevir
+          const sortedPrices = mapToSortedArray(pricesMapRef.current);
+
+          if (sortedPrices.length > 0) {
+            console.log('✅ WebSocket\'ten', data.prices.length, 'fiyat geldi, toplam:', sortedPrices.length);
+            setPrices(sortedPrices);
             setLastUpdate(new Date().toISOString());
 
+            // Local cache'e kaydet
+            await savePricesToCache(pricesMapRef.current);
+
             // Alarmları kontrol et
-            await checkAlarmsWithPrices(customPrices);
+            await checkAlarmsWithPrices(sortedPrices);
           }
         }
       });

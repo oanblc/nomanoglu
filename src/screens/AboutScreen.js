@@ -172,13 +172,13 @@ const styles = StyleSheet.create({
   titleLine: {
     flex: 1,
     height: 2,
-    backgroundColor: palette.headerGradientStart,
-    opacity: 0.3,
+    backgroundColor: '#333333',
+    opacity: 0.2,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: palette.headerGradientStart,
+    color: '#333333',
     marginHorizontal: 12,
     letterSpacing: 0.5,
   },

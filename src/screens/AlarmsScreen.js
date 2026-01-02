@@ -42,6 +42,16 @@ const AlarmsScreen = ({ navigation }) => {
     }));
   }, [prices]);
 
+  // Arama ile filtrelenmiş fiyatlar
+  const filteredPrices = useMemo(() => {
+    if (!searchQuery || !searchQuery.trim()) return allPrices;
+    const query = searchQuery.toLowerCase().trim();
+    return allPrices.filter(p =>
+      p.name?.toLowerCase().includes(query) ||
+      p.code?.toLowerCase().includes(query)
+    );
+  }, [allPrices, searchQuery]);
+
   useEffect(() => {
     loadAlarms();
     // Sayfa her odaklandığında alarmları yenile
@@ -55,6 +65,7 @@ const AlarmsScreen = ({ navigation }) => {
   const [targetPrice, setTargetPrice] = useState('');
   const [condition, setCondition] = useState('above');
   const [priceType, setPriceType] = useState('selling');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const loadAlarms = async () => {
     try {
@@ -81,6 +92,8 @@ const AlarmsScreen = ({ navigation }) => {
         condition: condition === 'above' ? '>' : '<',
         targetPrice: targetPrice,
         createdAt: new Date().toISOString(),
+        isActive: true,
+        triggered: false,
       };
 
       const updated = [...alarms, newAlarm];
@@ -202,23 +215,32 @@ const AlarmsScreen = ({ navigation }) => {
               : '-';
             const isAbove = item.condition === '>';
             const isTriggered = item.triggered === true;
+            const isActive = item.isActive !== false;
 
             return (
-              <View style={styles.alarmCard}>
+              <View style={[styles.alarmCard, !isActive && styles.alarmCardInactive]}>
                 <View style={styles.alarmCardContent}>
                   {/* Sol - Ürün İsmi ve Koşul */}
                   <View style={styles.alarmInfo}>
-                    <Text style={styles.alarmName}>{item.name}</Text>
+                    <View style={styles.alarmNameRow}>
+                      <Text style={[styles.alarmName, !isActive && styles.textInactive]}>{item.name}</Text>
+                      {isTriggered && (
+                        <View style={styles.triggeredBadge}>
+                          <FontAwesome5 name="check" size={8} color="#fff" />
+                          <Text style={styles.triggeredText}>Tetiklendi</Text>
+                        </View>
+                      )}
+                    </View>
                     <View style={styles.alarmCondition}>
-                      <Text style={styles.alarmPriceType}>{item.priceType}</Text>
+                      <Text style={[styles.alarmPriceType, !isActive && styles.textInactive]}>{item.priceType}</Text>
                       <FontAwesome5
                         name={isAbove ? 'arrow-up' : 'arrow-down'}
                         size={10}
-                        color={isAbove ? '#16a34a' : '#dc2626'}
+                        color={!isActive ? '#999' : (isAbove ? '#16a34a' : '#dc2626')}
                       />
                       <Text style={[
                         styles.alarmConditionText,
-                        { color: isAbove ? '#16a34a' : '#dc2626' }
+                        { color: !isActive ? '#999' : (isAbove ? '#16a34a' : '#dc2626') }
                       ]}>
                         {isAbove ? 'üstüne çıkarsa' : 'altına düşerse'}
                       </Text>
@@ -228,13 +250,13 @@ const AlarmsScreen = ({ navigation }) => {
                   {/* Orta - Fiyatlar */}
                   <View style={styles.alarmPrices}>
                     <View style={styles.alarmPriceItem}>
-                      <Text style={styles.alarmPriceLabel}>GÜNCEL</Text>
-                      <Text style={styles.alarmPriceValue}>{currentPrice}</Text>
+                      <Text style={[styles.alarmPriceLabel, !isActive && styles.textInactive]}>GÜNCEL</Text>
+                      <Text style={[styles.alarmPriceValue, !isActive && styles.textInactive]}>{currentPrice}</Text>
                     </View>
                     <View style={styles.alarmPriceSeparator} />
                     <View style={styles.alarmPriceItem}>
-                      <Text style={styles.alarmPriceLabel}>HEDEF</Text>
-                      <Text style={styles.alarmPriceValue}>{item.targetPrice}</Text>
+                      <Text style={[styles.alarmPriceLabel, !isActive && styles.textInactive]}>HEDEF</Text>
+                      <Text style={[styles.alarmPriceValue, !isActive && styles.textInactive]}>{item.targetPrice}</Text>
                     </View>
                   </View>
 
@@ -297,6 +319,7 @@ const AlarmsScreen = ({ navigation }) => {
                 setTargetPrice('');
                 setCondition('above');
                 setPriceType('selling');
+                setSearchQuery('');
               }}>
                 <FontAwesome5 name="times" size={24} color="#333" />
               </TouchableOpacity>
@@ -305,33 +328,62 @@ const AlarmsScreen = ({ navigation }) => {
             <ScrollView style={styles.createModalBody} contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={true}>
               {/* Select Price */}
               <Text style={styles.formLabel}>Fiyat Seçin</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.priceSelector}
-              >
-                {allPrices.map((price, index) => (
+
+              {/* Arama Kutusu */}
+              <View style={styles.searchContainer}>
+                <FontAwesome5 name="search" size={14} color="#999" style={styles.searchIcon} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Ürün ara..."
+                  placeholderTextColor="#999"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClear}>
+                    <FontAwesome5 name="times" size={12} color="#999" />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Fiyat Listesi */}
+              <View style={styles.priceListContainer}>
+                {filteredPrices.map((price, index) => (
                   <TouchableOpacity
                     key={index}
                     style={[
-                      styles.priceChip,
-                      selectedPrice?.code === price.code && styles.priceChipSelected
+                      styles.priceListItem,
+                      selectedPrice?.code === price.code && styles.priceListItemSelected
                     ]}
                     onPress={() => setSelectedPrice(price)}
                   >
-                    <Text style={[
-                      styles.priceChipText,
-                      selectedPrice?.code === price.code && styles.priceChipTextSelected
-                    ]}>
-                      {price.name}
-                    </Text>
+                    <View style={styles.priceListInfo}>
+                      <Text style={[
+                        styles.priceListName,
+                        selectedPrice?.code === price.code && styles.priceListNameSelected
+                      ]}>
+                        {price.name}
+                      </Text>
+                      <Text style={styles.priceListValues}>
+                        A: {price.buying} / S: {price.selling}
+                      </Text>
+                    </View>
+                    {selectedPrice?.code === price.code && (
+                      <FontAwesome5 name="check" size={14} color="#fff" />
+                    )}
                   </TouchableOpacity>
                 ))}
-              </ScrollView>
+              </View>
 
               {allPrices.length === 0 && (
                 <View style={styles.loadingContainer}>
                   <Text style={styles.loadingText}>Fiyatlar yükleniyor...</Text>
+                </View>
+              )}
+
+              {filteredPrices.length === 0 && allPrices.length > 0 && (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>Sonuç bulunamadı</Text>
                 </View>
               )}
 
@@ -596,6 +648,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(247, 222, 0, 0.12)',
   },
+  alarmCardInactive: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#e0e0e0',
+    opacity: 0.8,
+  },
+  alarmNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  triggeredBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#16a34a',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    gap: 3,
+  },
+  triggeredText: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  textInactive: {
+    color: '#999',
+  },
   alarmCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -698,29 +777,60 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 10,
   },
-  priceSelector: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: '#333',
+  },
+  searchClear: {
+    padding: 4,
+  },
+  priceListContainer: {
     marginBottom: 10,
   },
-  priceChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-    marginRight: 8,
-    borderWidth: 2,
-    borderColor: 'transparent',
+  priceListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
-  priceChipSelected: {
+  priceListItemSelected: {
     backgroundColor: palette.headerGradientStart,
     borderColor: palette.headerGradientStart,
   },
-  priceChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#666',
+  priceListInfo: {
+    flex: 1,
   },
-  priceChipTextSelected: {
-    color: '#FFFFFF',
+  priceListName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+  priceListNameSelected: {
+    color: '#fff',
+  },
+  priceListValues: {
+    fontSize: 11,
+    color: '#888',
   },
   loadingContainer: {
     padding: 20,
