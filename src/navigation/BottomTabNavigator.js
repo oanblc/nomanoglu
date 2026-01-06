@@ -17,8 +17,8 @@ const BottomTabNavigator = () => {
       initialRouteName="AnaSayfa"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: palette.navActive,
-        tabBarInactiveTintColor: palette.navInactive,
+        tabBarActiveTintColor: '#444444',
+        tabBarInactiveTintColor: '#666666',
         tabBarStyle: {
           backgroundColor: '#f9fafb',
           borderTopWidth: 0,
