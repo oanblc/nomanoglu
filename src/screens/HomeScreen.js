@@ -10,12 +10,12 @@ const FAVORITES_KEY = '@favorites';
 // Varsayılan slider ürünleri (favori yoksa gösterilecek)
 const DEFAULT_SLIDER_CODES = ['HAS ALTIN', 'ÇEYREK ALTIN', 'YARIM ALTIN'];
 
-// Helper to format prices
+// Helper to format prices (maksimum 2 basamak)
 const formatPrice = (value) => {
-  if (!value) return '0,0000';
+  if (!value) return '0,00';
   return new Intl.NumberFormat('tr-TR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 4,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
 };
 

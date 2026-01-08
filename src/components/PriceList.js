@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, SectionList, Pressable, Animated } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { palette } from '../../theme/colors';
 import { typography } from '../../theme/fonts';
@@ -8,13 +8,16 @@ import Header from './Header'; // Import the Blue Header
 
 const ListHeader = () => (
   <View style={styles.listHeader}>
-    <View style={styles.colLeft}>
-      <Text style={styles.listHeaderText}>Ürün</Text>
+    <View style={styles.headerName}>
+      <Text style={styles.listHeaderText}>Birim</Text>
     </View>
-    <View style={styles.colMid}>
-      <Text style={[styles.listHeaderText, { textAlign: 'right' }]}>Alış</Text>
+    <View style={styles.headerTime}>
+      <Text style={styles.listHeaderText}></Text>
     </View>
-    <View style={styles.colRight}>
+    <View style={styles.headerMid}>
+      <Text style={styles.listHeaderText}>Alış</Text>
+    </View>
+    <View style={styles.headerRight}>
       <Text style={[styles.listHeaderText, { textAlign: 'right' }]}>Satış</Text>
     </View>
   </View>
@@ -104,17 +107,13 @@ const PriceItem = ({ item }) => {
     }
   }, [item.buying, item.selling]);
 
-  // Renk belirleme - her fiyat kendi değişimine göre
+  // Renk belirleme - varsayılan siyah, sadece anlık değişimde renk değişsin
   const getBuyingColor = () => {
-    if (buyingDirection === 'up') return '#16a34a'; // yeşil
-    if (buyingDirection === 'down') return '#dc2626'; // kırmızı
-    return '#1A1A1A'; // siyah (değişim yok)
+    return '#1A1A1A'; // Her zaman siyah (HAREM gibi)
   };
 
   const getSellingColor = () => {
-    if (sellingDirection === 'up') return '#16a34a';
-    if (sellingDirection === 'down') return '#dc2626';
-    return '#1A1A1A';
+    return '#1A1A1A'; // Her zaman siyah (HAREM gibi)
   };
 
   // Ok ve yüzde rengi - satış fiyatının yönüne göre
@@ -131,8 +130,17 @@ const PriceItem = ({ item }) => {
   // Animasyonlu arka plan rengi
   const backgroundColor = flashAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [palette.screenBackground, 'rgba(247, 222, 0, 0.25)'] // Hafif sarı
+    outputRange: ['#ffffff', 'rgba(247, 222, 0, 0.25)'] // Beyaz → Hafif sarı
   });
+
+  // Saat bilgisini formatla - son güncelleme zamanı
+  const formatTime = () => {
+    // Şu anki zamanı al (son güncelleme zamanı olarak)
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
 
   return (
     <Pressable
@@ -141,40 +149,42 @@ const PriceItem = ({ item }) => {
       ]}
     >
       <Animated.View style={[styles.itemContainer, { backgroundColor }]}>
-      {/* İki satırlı yapı */}
-      <View style={styles.itemContent}>
-        {/* Üst satır: Ürün adı | Alış | Satış */}
-        <View style={styles.topRow}>
-          <View style={styles.colLeft}>
-            <Text style={styles.productName} numberOfLines={1}>{item.name?.toUpperCase()}</Text>
-          </View>
-          <View style={styles.colMid}>
-            <Text style={[styles.priceVal, { color: buyingColor }]}>{item.buying}</Text>
-          </View>
-          <View style={styles.colRight}>
-            <Text style={[styles.priceValBold, { color: sellingColor }]}>{item.selling}</Text>
-          </View>
+        {/* Sol: Ürün adı 2 satırda, saat ve fiyatlarla aynı hizada */}
+        <View style={styles.nameSection}>
+          <Text style={styles.productName} numberOfLines={2}>{item.name?.toUpperCase()}</Text>
+          <View style={styles.emptyRow} />
         </View>
 
-        {/* Alt satır: Son güncelleme saati | Yüzde ve Değişim üçgeni */}
-        <View style={styles.bottomRow}>
-          <View style={styles.colLeft}>
-            <Text style={styles.updateTime}>
-              {item.tarih ? item.tarih.split(' ')[1]?.substring(0, 5) : ''}
-            </Text>
+        {/* Saat: Fiyat adıyla aynı hizada */}
+        <View style={styles.timeSection}>
+          <View style={styles.timeContent}>
+            <Ionicons name="time-outline" size={12} color="#9ca3af" />
+            <Text style={styles.updateTime}>{formatTime()}</Text>
           </View>
-          <View style={styles.changeContainer}>
+          <View style={styles.emptyRow} />
+        </View>
+
+        {/* Alış: Satışla aynı hizada */}
+        <View style={styles.midSection}>
+          <Text style={[styles.priceVal, { color: buyingColor }]}>{item.buying}</Text>
+          <View style={styles.emptyRow} />
+        </View>
+
+        {/* Sağ: Satış (üst) + Değişim (alt) */}
+        <View style={styles.rightSection}>
+          <Text style={[styles.priceValBold, { color: sellingColor }]}>{item.selling}</Text>
+          <View style={styles.changeRow}>
             <Text style={[styles.percentText, { color: spreadColor }]}>
               {percent}
             </Text>
             <FontAwesome5
               name={sellingDirection === 'up' ? 'caret-up' : (sellingDirection === 'down' ? 'caret-down' : 'minus')}
-              size={sellingDirection ? 18 : 12}
+              size={sellingDirection ? 12 : 8}
               color={spreadColor}
+              style={{ marginLeft: 3 }}
             />
           </View>
         </View>
-      </View>
       </Animated.View>
     </Pressable>
   );
@@ -214,94 +224,105 @@ const styles = StyleSheet.create({
   },
   listHeader: {
     flexDirection: 'row',
-    backgroundColor: palette.listHeaderBg,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    backgroundColor: '#f5f5f5',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#d4d4d8',
+    borderBottomColor: '#e0e0e0',
     alignItems: 'center',
   },
   listHeaderText: {
-    color: palette.listHeaderText,
+    color: '#666666',
     fontSize: 12,
     fontWeight: '600',
   },
+  headerName: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  headerTime: {
+    width: 50,
+    justifyContent: 'center',
+  },
+  headerMid: {
+    width: 95,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  headerRight: {
+    width: 95,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
   itemContainer: {
-    height: 60,
-    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 60,
+    paddingVertical: 6,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
-    justifyContent: 'center',
+    backgroundColor: '#ffffff',
   },
-  itemContent: {
-    justifyContent: 'center',
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 20,
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 18,
-    marginTop: 2,
-  },
-  colLeft: {
+  nameSection: {
     flex: 1,
     justifyContent: 'center',
     paddingRight: 8,
   },
-  colMid: {
-    width: 85,
+  timeSection: {
+    width: 55,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+  },
+  timeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  midSection: {
+    width: 95,
     alignItems: 'flex-end',
     justifyContent: 'center',
   },
-  colRight: {
-    width: 85,
+  rightSection: {
+    width: 95,
     alignItems: 'flex-end',
     justifyContent: 'center',
   },
   productName: {
-    color: palette.currencyCode,
-    fontSize: 13,
+    color: '#1A1A1A',
+    fontSize: 14,
     fontWeight: '400',
-    letterSpacing: 0.5,
+    lineHeight: 18,
   },
   updateTime: {
     color: '#9ca3af',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '400',
+    marginLeft: 3,
   },
   priceVal: {
-    color: '#16a34a',
-    fontSize: 14,
-    fontWeight: '600',
+    color: '#1A1A1A',
+    fontSize: 16,
+    fontWeight: '400',
   },
   priceValBold: {
-    color: '#16a34a',
-    fontSize: 14,
-    fontWeight: '700',
+    color: '#1A1A1A',
+    fontSize: 16,
+    fontWeight: '400',
   },
-  changeContainer: {
-    width: 170,
+  changeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
+    marginTop: 2,
   },
   percentText: {
     fontSize: 11,
     fontWeight: '600',
-    marginRight: 6,
-    color: '#9ca3af', // Ürün kodu ile aynı gri ton
   },
-  changeIcon: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    justifyContent: 'center',
-    alignItems: 'center',
+  emptyRow: {
+    height: 16,
+    marginTop: 2,
   },
   itemPressed: {
     backgroundColor: '#f3f4f6',
