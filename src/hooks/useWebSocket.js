@@ -143,10 +143,25 @@ export const useWebSocket = () => {
         const result = await response.json();
 
         if (result.success && result.data?.prices?.length > 0) {
-          // Gelen fiyatları mevcut map'e ekle/güncelle (merge)
+          // API'den gelen fiyat kodlarını al
+          const apiPriceCodes = new Set(
+            result.data.prices
+              .filter(p => p.isCustom !== false && p.isVisible !== false)
+              .map(p => p.code)
+          );
+
+          // Cache'deki eski fiyatları sil (API'de olmayanlar)
+          Object.keys(pricesMapRef.current).forEach(code => {
+            if (!apiPriceCodes.has(code)) {
+              console.log('🗑️ Silinen fiyat temizlendi:', code);
+              delete pricesMapRef.current[code];
+              delete previousPricesRef.current[code];
+            }
+          });
+
+          // Gelen fiyatları güncelle
           result.data.prices.forEach(p => {
             if (p.isCustom !== false && p.isVisible !== false) {
-              const existingPrice = pricesMapRef.current[p.code];
               pricesMapRef.current[p.code] = {
                 ...p,
                 changePercent: '0.00',
@@ -208,7 +223,23 @@ export const useWebSocket = () => {
           // Alarmları yeniden yükle (yeni alarm eklenmiş olabilir)
           await loadAlarms();
 
-          // Gelen fiyatları mevcut map'e ekle/güncelle (MERGE - mevcut fiyatlar korunur)
+          // WebSocket'ten gelen fiyat kodlarını al
+          const wsPriceCodes = new Set(
+            data.prices
+              .filter(p => p.isCustom !== false && p.isVisible !== false)
+              .map(p => p.code)
+          );
+
+          // Cache'deki eski fiyatları sil (WebSocket'te olmayanlar)
+          Object.keys(pricesMapRef.current).forEach(code => {
+            if (!wsPriceCodes.has(code)) {
+              console.log('🗑️ WebSocket: Silinen fiyat temizlendi:', code);
+              delete pricesMapRef.current[code];
+              delete previousPricesRef.current[code];
+            }
+          });
+
+          // Gelen fiyatları güncelle
           data.prices.forEach(p => {
             if (p.isCustom !== false && p.isVisible !== false) {
               // Önceki fiyatla karşılaştır ve değişim yüzdesini hesapla
