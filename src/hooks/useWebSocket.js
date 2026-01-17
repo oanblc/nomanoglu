@@ -23,6 +23,19 @@ const calculateChangePercent = (currentPrice, previousPrice) => {
   };
 };
 
+// Fiyatı Türkçe formatla (decimals değerine göre)
+const formatPrice = (price, decimals = 0) => {
+  if (price === null || price === undefined || isNaN(price)) return '-';
+
+  // decimals değerini güvenli bir şekilde al
+  const decimalPlaces = Math.max(0, Math.min(4, parseInt(decimals) || 0));
+
+  return new Intl.NumberFormat('tr-TR', {
+    minimumFractionDigits: decimalPlaces,
+    maximumFractionDigits: decimalPlaces
+  }).format(price);
+};
+
 export const useWebSocket = () => {
   const [prices, setPrices] = useState(demoData);
   const [isConnected, setIsConnected] = useState(false);
@@ -164,6 +177,9 @@ export const useWebSocket = () => {
             if (p.isCustom !== false && p.isVisible !== false) {
               pricesMapRef.current[p.code] = {
                 ...p,
+                // decimals değerine göre formatla
+                buying: formatPrice(p.calculatedAlis, p.decimals),
+                selling: formatPrice(p.calculatedSatis, p.decimals),
                 changePercent: '0.00',
                 isPositive: true,
                 hasChange: false
@@ -248,6 +264,9 @@ export const useWebSocket = () => {
 
               pricesMapRef.current[p.code] = {
                 ...p,
+                // decimals değerine göre formatla
+                buying: formatPrice(p.calculatedAlis, p.decimals),
+                selling: formatPrice(p.calculatedSatis, p.decimals),
                 changePercent: changeInfo.percent,
                 isPositive: changeInfo.isPositive,
                 hasChange: changeInfo.hasChange
