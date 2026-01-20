@@ -10,14 +10,6 @@ const FAVORITES_KEY = '@favorites';
 // Varsayılan slider ürünleri (favori yoksa gösterilecek)
 const DEFAULT_SLIDER_CODES = ['HAS ALTIN', 'ÇEYREK ALTIN', 'YARIM ALTIN'];
 
-// Helper to format prices (maksimum 2 basamak)
-const formatPrice = (value) => {
-  if (!value) return '0,00';
-  return new Intl.NumberFormat('tr-TR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-};
 
 // Initial placeholder - Backend'den yüklenecek
 const INITIAL_DATA = [];
@@ -51,13 +43,13 @@ const HomeScreen = ({ navigation }) => {
   const displayData = useMemo(() => {
     if (!prices || prices.length === 0) return INITIAL_DATA;
 
-    // Backend'den gelen fiyat değişim yüzdesini kullan
+    // Backend'den gelen fiyat değişim yüzdesini kullan (useWebSocket zaten formatlamış)
     return prices.map(p => {
       return {
         code: p.code,
         name: p.name || p.code,
-        buying: formatPrice(p.calculatedAlis),
-        selling: formatPrice(p.calculatedSatis),
+        buying: p.buying,
+        selling: p.selling,
         percent: `%${p.changePercent || '0.00'}`,
         isPositive: p.isPositive,
         hasChange: p.hasChange || false,
@@ -89,9 +81,9 @@ const HomeScreen = ({ navigation }) => {
         return {
           symbol: p.code,
           name: p.name || p.code,
-          buying: formatPrice(p.calculatedAlis),
-          selling: formatPrice(p.calculatedSatis),
-          price: formatPrice(p.calculatedSatis),
+          buying: p.buying,
+          selling: p.selling,
+          price: p.selling,
           percent: `%${p.changePercent || '0.00'}`,
           isPositive: p.isPositive
         };

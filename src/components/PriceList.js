@@ -290,9 +290,10 @@ const styles = StyleSheet.create({
   },
   productName: {
     color: '#1A1A1A',
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '400',
-    lineHeight: 18,
+    lineHeight: 21,
+    fontFamily: 'Roboto_400Regular',
   },
   updateTime: {
     color: '#9ca3af',
@@ -302,13 +303,15 @@ const styles = StyleSheet.create({
   },
   priceVal: {
     color: '#1A1A1A',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '400',
+    fontFamily: 'Roboto_400Regular',
   },
   priceValBold: {
     color: '#1A1A1A',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '400',
+    fontFamily: 'Roboto_400Regular',
   },
   changeRow: {
     flexDirection: 'row',

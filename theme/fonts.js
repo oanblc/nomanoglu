@@ -1,42 +1,37 @@
 export const typography = {
-  // "Cinzel" serif font for Logo
+  // Logo font
   logo: {
-    fontFamily: 'serif',
+    fontFamily: 'Roboto_700Bold',
     fontSize: 24,
     letterSpacing: 2,
-    fontWeight: '400',
   },
-  // "Roboto" system font
+  // Roboto font variants
   heroPrice: {
-    fontFamily: 'System',
+    fontFamily: 'Roboto_500Medium',
     fontSize: 22,
-    fontWeight: '500',
   },
   heroSymbol: {
-    fontFamily: 'System',
+    fontFamily: 'Roboto_400Regular',
     fontSize: 13,
   },
   listHeader: {
-    fontFamily: 'System',
+    fontFamily: 'Roboto_500Medium',
     fontSize: 14,
-    fontWeight: '500',
   },
   currencyCode: {
-    fontFamily: 'System',
+    fontFamily: 'Roboto_500Medium',
     fontSize: 16,
-    fontWeight: '500',
   },
   currencyName: {
-    fontFamily: 'System',
+    fontFamily: 'Roboto_400Regular',
     fontSize: 12,
   },
   priceVal: {
-    fontFamily: 'System',
+    fontFamily: 'Roboto_400Regular',
     fontSize: 18,
-    fontWeight: '400',
   },
   navLabel: {
-    fontFamily: 'System',
+    fontFamily: 'Roboto_400Regular',
     fontSize: 11,
   }
 };

@@ -10,14 +10,6 @@ import { palette, gradient } from '../../theme/colors';
 import { typography } from '../../theme/fonts';
 import Sidebar from '../components/Sidebar';
 
-// Helper to format prices
-const formatPrice = (value) => {
-  if (!value) return '0,0000';
-  return new Intl.NumberFormat('tr-TR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 4,
-  }).format(value);
-};
 
 // Initial placeholder - Backend'den yüklenecek
 const INITIAL_DATA = [];
@@ -27,7 +19,7 @@ const MarketsScreen = ({ navigation }) => {
   const { prices, isConnected } = useWebSocket();
   const sidebarRef = useRef(null);
 
-  // Backend'den gelen fiyatları formatla - fiyat değişim yüzdesini kullan
+  // Backend'den gelen fiyatları kullan (useWebSocket zaten formatlamış)
   const displayData = useMemo(() => {
     if (!prices || prices.length === 0) return INITIAL_DATA;
 
@@ -35,8 +27,8 @@ const MarketsScreen = ({ navigation }) => {
       return {
         code: p.code,
         name: p.name || p.code,
-        buying: formatPrice(p.calculatedAlis),
-        selling: formatPrice(p.calculatedSatis),
+        buying: p.buying,
+        selling: p.selling,
         percent: `%${p.changePercent || '0.00'}`,
         isPositive: p.isPositive,
         hasChange: p.hasChange || false,
@@ -107,17 +99,17 @@ const MarketsScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={openInstagram}>
-          <FontAwesome5 name="instagram" size={20} color={palette.navInactive} />
+          <FontAwesome5 name="instagram" size={20} color="#E4405F" />
           <Text style={styles.tabLabel}>Instagram</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={openTikTok}>
-          <FontAwesome5 name="tiktok" size={20} color={palette.navInactive} />
+          <FontAwesome5 name="tiktok" size={20} color="#000000" />
           <Text style={styles.tabLabel}>TikTok</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={openWebsite}>
-          <FontAwesome5 name="globe" size={20} color={palette.navInactive} />
+          <FontAwesome5 name="globe" size={20} color="#1E90FF" />
           <Text style={styles.tabLabel}>Web Sitesi</Text>
         </TouchableOpacity>
       </View>

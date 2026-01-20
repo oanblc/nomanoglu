@@ -284,17 +284,17 @@ const AlarmsScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={openInstagram}>
-          <FontAwesome5 name="instagram" size={20} color={palette.navInactive} />
+          <FontAwesome5 name="instagram" size={20} color="#E4405F" />
           <Text style={styles.tabLabel}>Instagram</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={openTikTok}>
-          <FontAwesome5 name="tiktok" size={20} color={palette.navInactive} />
+          <FontAwesome5 name="tiktok" size={20} color="#000000" />
           <Text style={styles.tabLabel}>TikTok</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={openWebsite}>
-          <FontAwesome5 name="globe" size={20} color={palette.navInactive} />
+          <FontAwesome5 name="globe" size={20} color="#1E90FF" />
           <Text style={styles.tabLabel}>Web Sitesi</Text>
         </TouchableOpacity>
       </View>

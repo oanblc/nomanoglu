@@ -67,8 +67,8 @@ const BottomTabNavigator = () => {
         }}
         options={{
           tabBarLabel: 'Instagram',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="instagram" size={20} color={color} />
+          tabBarIcon: ({ focused, size }) => (
+            <FontAwesome5 name="instagram" size={20} color="#E4405F" />
           ),
         }}
       />
@@ -83,8 +83,8 @@ const BottomTabNavigator = () => {
         }}
         options={{
           tabBarLabel: 'TikTok',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="tiktok" size={20} color={color} />
+          tabBarIcon: ({ focused, size }) => (
+            <FontAwesome5 name="tiktok" size={20} color="#000000" />
           ),
         }}
       />
@@ -99,8 +99,8 @@ const BottomTabNavigator = () => {
         }}
         options={{
           tabBarLabel: 'Web Sitesi',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="globe" size={20} color={color} />
+          tabBarIcon: ({ focused, size }) => (
+            <FontAwesome5 name="globe" size={20} color="#1E90FF" />
           ),
         }}
       />

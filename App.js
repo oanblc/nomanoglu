@@ -1,13 +1,18 @@
 import 'react-native-gesture-handler';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts, Roboto_400Regular, Roboto_500Medium, Roboto_700Bold } from '@expo-google-fonts/roboto';
+import * as ExpoSplashScreen from 'expo-splash-screen';
 import AppNavigator from './src/navigation/AppNavigator';
 import SplashScreen from './src/components/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+
+// Font yüklenene kadar splash screen'i göster
+ExpoSplashScreen.preventAutoHideAsync();
 
 const ONBOARDING_KEY = '@onboarding_complete';
 
@@ -40,6 +45,20 @@ export default function App() {
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [appReady, setAppReady] = useState(false);
 
+  // Roboto fontlarını yükle
+  const [fontsLoaded] = useFonts({
+    Roboto_400Regular,
+    Roboto_500Medium,
+    Roboto_700Bold,
+  });
+
+  // Font yüklendiğinde splash screen'i gizle
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await ExpoSplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
   // Onboarding durumunu kontrol et
   useEffect(() => {
     const checkOnboarding = async () => {
@@ -64,9 +83,14 @@ export default function App() {
     }
   }, [showSplash, showOnboarding]);
 
+  // Fontlar yüklenene kadar bekle
+  if (!fontsLoaded) {
+    return null;
+  }
+
   if (showSplash || checkingOnboarding) {
     return (
-      <SafeAreaProvider>
+      <SafeAreaProvider onLayout={onLayoutRootView}>
         <SplashScreen onFinish={() => setShowSplash(false)} />
       </SafeAreaProvider>
     );
@@ -74,14 +98,14 @@ export default function App() {
 
   if (showOnboarding) {
     return (
-      <SafeAreaProvider>
+      <SafeAreaProvider onLayout={onLayoutRootView}>
         <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
       </SafeAreaProvider>
     );
   }
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider onLayout={onLayoutRootView}>
       <PaperProvider theme={theme}>
         <NavigationContainer>
           <AppNavigator />
