@@ -7,6 +7,8 @@ import FavoritesScreen from '../screens/FavoritesScreen';
 import AboutScreen from '../screens/AboutScreen';
 import ContactScreen from '../screens/ContactScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
+import EmployeeLoginScreen from '../screens/EmployeeLoginScreen';
+import KYCFormScreen from '../screens/KYCFormScreen';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +42,14 @@ const AppNavigator = () => {
       <Stack.Screen
         name="Bildirimler"
         component={NotificationsScreen}
+      />
+      <Stack.Screen
+        name="EmployeeLogin"
+        component={EmployeeLoginScreen}
+      />
+      <Stack.Screen
+        name="KYCForm"
+        component={KYCFormScreen}
       />
     </Stack.Navigator>
   );

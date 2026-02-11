@@ -108,6 +108,8 @@ const Header = ({ topRates = [], navigation }) => {
         navigation.navigate('Hakkimizda');
       } else if (action === 'home' && navigation) {
         navigation.navigate('MainTabs', { screen: 'AnaSayfa' });
+      } else if (action === 'kycform' && navigation) {
+        navigation.navigate('EmployeeLogin');
       }
     }, 300);
   };
@@ -293,6 +295,14 @@ const Header = ({ topRates = [], navigation }) => {
                       <FontAwesome5 name="envelope" size={16} color="#6B7280" />
                     </View>
                     <Text style={styles.menuItemText}>İletişim</Text>
+                    <FontAwesome5 name="chevron-right" size={12} color="#D1D5DB" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuPress('kycform')}>
+                    <View style={styles.menuIconBox}>
+                      <FontAwesome5 name="file-alt" size={16} color="#F7DE00" />
+                    </View>
+                    <Text style={styles.menuItemText}>Müşteri Formu</Text>
                     <FontAwesome5 name="chevron-right" size={12} color="#D1D5DB" />
                   </TouchableOpacity>
                 </View>

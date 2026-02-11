@@ -35,7 +35,13 @@
           "color": "#1e3a5f"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "react-native-document-scanner-plugin",
+        {
+          "cameraPermission": "Kimlik belgesi taraması için kamera erişimi gereklidir"
+        }
+      ]
     ],
     "extra": {
       "eas": {
